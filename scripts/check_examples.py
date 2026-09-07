@@ -13,9 +13,10 @@ torch.set_num_threads(1)
 torch.manual_seed(7)
 
 
-def definitions(path, indices, namespace):
+def definitions(path, identifiers, namespace):
     cells = json.loads(path.read_text(encoding='utf-8'))['cells']
-    for i in indices:
+    cells = {cell['id']: cell for cell in cells}
+    for i in identifiers:
         tree = ast.parse(''.join(cells[i]['source']))
         tree.body = [node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef))]
         exec(compile(tree, f'{path.name}:{i}', 'exec'), namespace)
@@ -25,7 +26,7 @@ def check():
     # No duplicate implementation: tests extract and execute the actual teaching code.
     env = dict(torch=torch, nn=nn, F=F, sqrt=sqrt, copy=copy, device='cpu')
     path = next(ROOT.glob('03*/*.ipynb'))
-    definitions(path, [3, 4, 7, 8, 10, 11, 12, 13, 14], env)
+    definitions(path, ['legacy-03-003', 'legacy-03-004', 'legacy-03-007', 'legacy-03-008', 'legacy-03-010', 'legacy-03-011', 'legacy-03-012', 'legacy-03-013', 'legacy-03-014'], env)
     x = torch.randn(2, 5, 8)
     norm = env['LayerNorm'](8)
     torch.testing.assert_close(norm(x), F.layer_norm(x, (8,), norm.a2, norm.b2, norm.eps))
@@ -66,11 +67,11 @@ def check():
     (-out[0, 0, 2].log()).backward()
     assert model.source_embed.embedding_layer.weight.grad is not None
     # Check that the shipped integration cells do not reintroduce causal source masks.
-    demo = ''.join(json.loads(path.read_text(encoding='utf-8'))['cells'][15]['source'])
+    demo = ''.join(next(c for c in json.loads(path.read_text(encoding='utf-8'))['cells'] if c['id'] == 'legacy-03-015')['source'])
     assignments = [node for node in ast.walk(ast.parse(demo)) if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'mask2' for t in node.targets)]
     assert len(assignments) == 3 and all(isinstance(a.value, ast.Constant) and a.value.value is None for a in assignments)
     env.update(optim=torch.optim)
-    definitions(next(ROOT.glob('02*/*.ipynb')), [55, 57, 59], env)
+    definitions(next(ROOT.glob('02*/*.ipynb')), ['9dbbe5da', 'e07c76d2', '0c848dcb'], env)
     samples = torch.utils.data.TensorDataset(torch.randn(4, 1, 28, 28), torch.tensor([0, 1, 2, 3]))
     loaders = {key: torch.utils.data.DataLoader(samples, batch_size=2) for key in ('train', 'test')}
     env['loaders'] = loaders

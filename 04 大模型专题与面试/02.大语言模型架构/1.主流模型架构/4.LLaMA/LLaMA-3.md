@@ -82,13 +82,13 @@ LLaMA3 使用了超过 \*\*15T \*\*的 Tokens 进行预训练，这数据全部�
 
 在众多基准测试中，8B模型超越了Mistral 7B和Gemma 7B，70B模型则战胜了Gemini Pro 1.0和Mixtral 8x22B。
 
-![](image/image_IvQxAiuPj-.png)
+![](../../../images/image_IvQxAiuPj-.png)
 
 ### 6.2 指令微调模型性能
 
 Meta官方数据显示，在各自参数规模上，Llama-3 8B和70B版本都取得了不错的成绩。8B模型在众多基准测试中均胜过Gemma 7B和Mistral 7B Instruct，而70B模型超越了闭源模型Claude 3 Sonnet，对比谷歌的Gemini Pro 1.5性能也是相当。
 
-![](image/image_by6m8VjSm2.png)
+![](../../../images/image_by6m8VjSm2.png)
 
 ### 6.3 人工评估结果
 
@@ -96,14 +96,14 @@ Meta官方数据显示，在各自参数规模上，Llama-3 8B和70B版本都取
 
 下图显示了针对 Claude Sonnet、Mistral Medium 和 GPT-3.5 对这些类别和提示进行人工评估的汇总结果。
 
-![](image/image_f7aV2UuNc7.png)
+![](../../../images/image_f7aV2UuNc7.png)
 
 ## 7.LLaMA3-400B 正在训练中
 
 LLaMA3 最大的模型有超过 400B 个参数，但该模型仍在训练中。基于 LLaMA3-400B 的早期检查点的性能测试如下：
 
-![](image/image_xHBq-aoxIb.png)
+![](../../../images/image_xHBq-aoxIb.png)
 
 值得注意的是，根据英伟达科学家Jim Fan的整理，Llama3 400B基本逼近Claude-3-Opus和GPT-4-turbo，这将意味着开源社区即将迎来GPT-4级大模型。
 
-![](image/image_uLhKN6r6M4.png)
+![](../../../images/image_uLhKN6r6M4.png)

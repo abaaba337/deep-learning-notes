@@ -8,7 +8,7 @@
 
 ### 1.1 强化学习整体流程 &#x20;
 
-![](image/image_WbUpMYZf_9.png)
+![](../../images/image_WbUpMYZf_9.png)
 
 强化学习的两个实体：**智能体（Agent）**与**环境（Environment）**
 
@@ -47,7 +47,7 @@ $$
 
 在第一部分介绍了通用强化学习的流程，那么要怎么把这个流程对应到NLP任务中呢？**换句话说，NLP任务中的智能体、环境、状态、动作等等，都是指什么呢？**
 
-![](image/image__amAsvnuon.png)
+![](../../images/image__amAsvnuon.png)
 
 回想一下对NLP任务做强化学习（RLHF）的目的：**希望给模型一个prompt，让模型能生成符合人类喜好的response**。再回想一下GPT模型做推理的过程：**每个时刻** `t` **只产生一个token，即token是一个一个蹦出来的，先有上一个token，再有下一个token**\*\*。\*\*&#x20;
 
@@ -84,7 +84,7 @@ $$
 
 从第二部分中已经知道：生成token $A_{t}$ 和对应收益 $R_{t}$, $V_{t}$ 的并不是一个模型。那么在RLHF中到底有几个模型？他们是怎么配合做训练的？而我们最终要的是哪个模型？
 
-![](image/image_ERN1ZS1gIZ.png)
+![](../../images/image_ERN1ZS1gIZ.png)
 
 如上图，**在RLHF-PPO阶段，一共有四个主要模型**，分别是： &#x20;
 
@@ -104,7 +104,7 @@ $$
 
 正如前文所说，**Actor就是想要训练的目标语言模型。****一般用SFT阶段产出的SFT模型来对它做初始化****。**&#x20;
 
-![](image/image_UJo5yV8oUe.png)
+![](../../images/image_UJo5yV8oUe.png)
 
 最终目的是**让Actor模型能产生符合人类喜好的response**。所以策略是，先喂给Actor一条prompt （这里假设`batch_size = 1`，所以是1条prompt），让它生成对应的response。然后，再将“prompt + response"送入我们的“奖励-loss”计算体系中去算得最后的loss，用于更新actor。
 
@@ -112,7 +112,7 @@ $$
 
 **Reference Model（以下简称Ref模型）****一般也用SFT阶段得到的SFT模型做初始化****，****在训练过程中，它的参数是冻结的****。** Ref模型的主要作用是防止Actor“训歪”，那么它具体是怎么做到这一点的呢？
 
-![](image/image_ydA_4yGRGK.png)
+![](../../images/image_ydA_4yGRGK.png)
 
 “防止模型训歪”换一个更详细的解释是：**希望训练出来的Actor模型既能达到符合人类喜好的目的，又尽量让它和SFT模型不要差异太大**。简言之，**希望两个模型的输出分布尽量相似**。那什么指标能用来衡量输出分布的相似度呢？自然而然想到了**KL散度**。
 
@@ -138,7 +138,7 @@ $$
 
 **所以总结来说，在RLHF中，不仅要训练模型生成符合人类喜好的内容的能力（Actor），也要提升模型对人类喜好量化判断的能力（Critic）**。这就是Critic模型存在的意义。来看看它的大致架构：
 
-![](image/image_nlFESPCvlS.png)
+![](../../images/image_nlFESPCvlS.png)
 
 deepspeed-chat采用了**Reward模型作为它的初始化**，所以这里也按Reward模型的架构来简单画画它。你可以简单理解成，Reward/Critic模型和Actor模型的架构是很相似的（毕竟输入都一样），同时，它在最后一层增加了一个Value Head层，该层是个简单的线形层，用于将原始输出结果映射成单一的 $V\_{t}$ 值。
 
@@ -166,7 +166,7 @@ Reward Model用于**计算生成token **$A_{t}$** 的即时收益**，它就是R
 
 Reward模型和critic模型非常相似，这里就只给出架构图，不再做过多的说明。关于Reward模型的训练过程，后续有时间也会出个原理和代码解析。
 
-![](image/image_Wp-x1ChMJK.png)
+![](../../images/image_Wp-x1ChMJK.png)
 
 ## 4.RLHF中的loss计算
 
@@ -229,7 +229,7 @@ $$
 
 按照这个理解， $R_{t}$ 应该表示每个Actor产出token $A_{t}$ 带来的即时收益，正如下图所示（其中 `T` 表示最后一个时刻）：
 
-![](image/image_keCqxZ7eg6.png)
+![](../../images/image_keCqxZ7eg6.png)
 
 但在deepspeed-chat的RLHF实践中，对 $R_{t}$ 做了另一种设计：
 
@@ -390,7 +390,7 @@ $$
 
 基于这些改造，重新理一遍**RLHF-PPO**的训练过程。
 
-![](image/image_S7YG1wh9l5.png)
+![](../../images/image_S7YG1wh9l5.png)
 
 -   第一步，准备一个batch的prompts
 -   第二步，将这个batch的prompts喂给Actor模型，让它生成对应的responses

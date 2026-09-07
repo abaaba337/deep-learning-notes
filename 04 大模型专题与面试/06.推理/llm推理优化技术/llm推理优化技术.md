@@ -2,7 +2,7 @@
 
 > 原文链接：[Mastering LLM Techniques: Inference Optimization | NVIDIA Technical Blog](https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/ "Mastering LLM Techniques: Inference Optimization | NVIDIA Technical Blog")
 
-![](image/image_uNjDdIhbrf.png)
+![](../../images/image_uNjDdIhbrf.png)
 
 堆叠Transformer层以创建大型模型可以获得更好的准确性、few-shot学习能力，甚至在各种语言任务中具有接近人类的涌现能力。这些基础模型的训练成本很高，而且在推理过程中可能需要大量的内存和计算（经常性成本）。当今最流行的大型语言模型（LLM）的大小可以达到数百亿到数千亿个参数，并且根据用例的不同，可能需要摄入长输入（或上下文），这也会增加开销。
 
@@ -40,7 +40,7 @@
 
 为了避免在每个时间步重新计算所有tokens的这些张量，**可以将它们缓存在 GPU 内存中**。每次迭代，当需要计算新token时，它们都会被添加到正在运行的缓存中，以便在下一次迭代中使用。在一些实现中，模型的每一层都有一个KV缓存。
 
-![](image/image_AEKiGYL_qQ.png)
+![](../../images/image_AEKiGYL_qQ.png)
 
 > 图1 KV缓存机制
 
@@ -85,7 +85,7 @@ Pipeline并行化**将模型（垂直）分片为块，其中每个块包含在�
 
 **微批处理可以在一定程度上缓解这种情况**，如图 2c 所示。输入的全局批次大小被分成子批次，这些子批次被一一处理，最后累积梯度。请注意，$F_{n,m}$ 和 $B_{n,m}$ 分别表示设备`n`上`m`批次的前向和后向传递。**这种方法缩小了管道气泡的尺寸，但并没有完全消除它们**。
 
-![](image/image_QafcBySU-O.png)
+![](../../images/image_QafcBySU-O.png)
 
 > 图2 Pipeline并行，
 
@@ -93,7 +93,7 @@ Pipeline并行化**将模型（垂直）分片为块，其中每个块包含在�
 
 Tensor并行化**将模型的各个层（水平）分片为更小的、独立的计算块，这些计算块可以在不同的设备上执行**。Transformer的主要组成部分，注意力块和多层感知器（MLP）层是可以利用Tensor并行化的。在多头注意力块中，每个头或一组头可以分配给不同的设备，以便它们可以独立且并行地计算。
 
-![](image/image_VVO18J1gRS.png)
+![](../../images/image_VVO18J1gRS.png)
 
 > 图3 Tensor并行化MLP和自注意力
 
@@ -107,7 +107,7 @@ Tensor并行化是有局限性，它需要将层划分为独立的、可管理�
 
 如[Reducing Activation Recomputation in Large Transformer Models](https://arxiv.org/pdf/2205.05198.pdf "Reducing Activation Recomputation in Large Transformer Models")所示，这些操作在输入序列中是独立的，并且这些操作**可以沿着“序列维度”进行分区**，从而提高内存效率。这称为序列并行性。
 
-![](image/image_zE-LAHnZ8C.png)
+![](../../images/image_zE-LAHnZ8C.png)
 
 > 图4，transformer层的tensor并行化和sequence并行化
 
@@ -125,7 +125,7 @@ Tensor并行化是有局限性，它需要将层划分为独立的、可管理�
 
 当使用八个并行注意力头时，每个注意力头的维度都会减少（例如 $d\_model/8$）。这使得计算成本与单头注意力相似。
 
-![](image/image_pbAdMKk9tF.png)
+![](../../images/image_pbAdMKk9tF.png)
 
 > 图5 缩放点积注意力（左）和多头注意力（右）的图示，并行的多个 SDPA 头
 
@@ -143,7 +143,7 @@ key头的减少会带来潜在的准确性下降。此外，需要在推理时�
 
 图 6 显示多头注意力有多个键值头（左）。分组查询注意力（中心）的键值头多于一个，但少于查询头的数量，这是内存需求和模型质量之间的平衡。多查询注意力（右）具有单个键值头，有助于节省内存。
 
-![](image/image_FcaaSJJ5h_.png)
+![](../../images/image_FcaaSJJ5h_.png)
 
 最初使用 MHA 训练的模型可以使用原始训练计算的一小部分通过 GQA 进行“升级训练”。它们获得接近 MHA 的质量，同时保持接近 MQA 的计算效率。 Llama 2 70B 是利用 GQA 的模型示例。
 
@@ -161,7 +161,7 @@ I/O 感知意味着在将操作融合在一起时，它会考虑前面讨论的�
 
 图 7 显示了 40 GB GPU 上的平铺 FlashAttention 计算模式和内存层次结构。右图显示了对注意力机制的不同组件进行融合和重新排序所带来的相对加速。
 
-![](image/image_lFEkt_VJOw.png)
+![](../../images/image_lFEkt_VJOw.png)
 
 > 图7 40 GB GPU 上的平铺 FlashAttention 计算模式和内存层次结构
 
@@ -169,7 +169,7 @@ I/O 感知意味着在将操作融合在一起时，它会考虑前面讨论的�
 
 有时，KV 缓存会静态地“过度配置”(over-provisioned)，以考虑最大可能的输入（支持的序列长度），因为输入的大小是不可预测的。例如，如果模型支持的最大序列长度为 2,048，则**无论请求中输入和生成的输出的大小如何，都将在内存中保留大小为 2,048 的数据。该空间可以是连续分配的，并且通常其中大部分未被使用，从而导致内存浪费或碎片**。该保留空间在请求的生命周期内被占用。
 
-![](image/image_AGCdnhUzLr.png)
+![](../../images/image_AGCdnhUzLr.png)
 
 > 图8 由于过度配置和低效的 KV 缓存管理而导致的内存浪费和碎片
 
@@ -187,7 +187,7 @@ I/O 感知意味着在将操作融合在一起时，它会考虑前面讨论的�
 
 图 9 显示了一种可能的量化方法之前和之后的值分布。在这种情况下，舍入会丢失一些精度，并且剪裁会丢失一些动态范围，从而允许以更小的格式表示值。
 
-![](image/image_BNdLa1BC7X.png)
+![](../../images/image_BNdLa1BC7X.png)
 
 > 图9 一种可能的量化方法之前和之后的值分布
 
@@ -203,7 +203,7 @@ LLM 有许多不同的量化技术，涉及降低激活、权重或两者的精�
 
 与量化类似，事实证明，许多深度学习模型对于修剪或用 `0` 本身替换某些接近 `0` 的值具有鲁棒性。稀疏矩阵是许多元素为 0 的矩阵。这些矩阵可以用压缩形式表示，比完整的稠密矩阵占用的空间更少。
 
-![](image/image_Jh1fTO1EPP.png)
+![](../../images/image_Jh1fTO1EPP.png)
 
 > 图10，以压缩格式表示的稀疏矩阵，由非零数据值及其相应的两位索引组成
 
@@ -222,7 +222,7 @@ GPU 尤其具有针对某种结构化稀疏性的硬件加速，其中每四个�
 
 图 11 显示了知识蒸馏的总体框架。教师的 `logits `是学生使用蒸馏损失进行优化的软目标。其他蒸馏方法可能会使用其他损失措施来从老师那里“蒸馏”知识。
 
-![](image/image_LscREP6Kiz.png)
+![](../../images/image_LscREP6Kiz.png)
 
 > 图11，知识蒸馏的通用框架
 
@@ -255,7 +255,7 @@ LLMs 具有一些独特的执行特征，这些特征可能导致在实践中难
 
 图 12 显示了预测推理的示例，其中临时模型临时预测并行验证或拒绝的多个未来步骤。在这种情况下，临时模型中的前两个预测token被接受，而最后一个在继续生成之前被拒绝并删除。
 
-![](image/image_OLpAPEiij9.png)
+![](../../images/image_OLpAPEiij9.png)
 
 > 图12， 预测推理示例
 

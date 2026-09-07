@@ -9,7 +9,7 @@ Direct Preference Optimization: Your Language Model is Secretly a Reward Model
 
 基于 **人类反馈的强化学习（RLHF）** 是一个复杂且不稳定的过程，拟合一个反映人类偏好的奖励模型，然后使用强化学习对大语言模型进行微调，以最大限度地提高估计奖励，同时又不能偏离原始模型太远。这涉及训练多个 LM，并在训练循环中从 LM 采样，从而产生大量的计算成本。
 
-![](image/image_udA7tRUhZv.png)
+![](../../images/image_udA7tRUhZv.png)
 
 本文作者提出了 **直接偏好优化（DPO）** 算法，它稳定、高效且计算量轻，**无需拟合奖励模型，也无需在微调期间从LM采样或执行显著的超参数调整**。
 
@@ -64,7 +64,7 @@ $$
 5.  拿2份做差的数据，计算KL散度；惩罚policy模型对正样本概率的下降和负样本概率的上升
 6.  以KL散度计算Loss
 
-![](image/image_okPAsQWVne.png)
+![](../../images/image_okPAsQWVne.png)
 
 #### 3.1 DPO 目标函数
 
@@ -106,7 +106,7 @@ $$
 
 ### 4.实验
 
-![](image/image_lGnkS89SGZ.png)
+![](../../images/image_lGnkS89SGZ.png)
 
 -   **最大化奖励的同时最小化 KL 散度**。可以看到 DPO 在保持较小 KL 散度时，也能够达到最大奖励。而 PPO 随着奖励的增大，KL 散度也在增大。
 -   **对不同采样温度的鲁棒性**。DPO 在不同的采样温度下全面优于 PPO，同时在 Best of N 基线的最佳温度下也更胜一筹。

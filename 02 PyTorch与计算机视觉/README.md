@@ -1,17 +1,26 @@
 # 02 PyTorch与计算机视觉
 
-[返回学习路径](../README.md)
+[打开 Notebook](notes.ipynb) | [返回学习路径](../README.md)
 
-按原笔记顺序学习 OpenCV、FNN/MNIST、CNN、RNN/LSTM、注意力、图像处理和强化学习概念。
+## 阅读顺序
 
-- [CMIT Lecture Notes.ipynb](CMIT%20Lecture%20Notes.ipynb)
+- [2.1 PyTorch 与前馈神经网络](notes.ipynb#part-02-01)
+- [2.2 OpenCV 与图像输入](notes.ipynb#part-02-02)
+- [2.3 卷积神经网络](notes.ipynb#part-02-03)
+- [2.4 U-Net 与语义分割](notes.ipynb#part-02-04)
+- [2.5 图像去噪](notes.ipynb#part-02-05)
+- [2.6 RNN、LSTM 与序列建模](notes.ipynb#part-02-06)
 
-## 运行入口
+## 运行与资源
 
-在本目录启动 Jupyter，并打开 `CMIT Lecture Notes.ipynb`。笔记中的 `train`、`test`、`CNN` 等名称会被后续章节重新定义，请按章节顺序执行对应的导入和定义。
+在本章节目录中启动 Jupyter，按主题执行导入、数据准备和模型定义。图片统一放在 `images/`，文件名相同时以内容摘要区分。数据、视频和模型权重不放入图片目录。
 
-MNIST 数据保留了一份；也可由 `datasets.MNIST(download=True)` 获取。图像、视频、模型权重和股票示例的相对目录保留。
+`train`、`test`、`CNN` 等名称会在不同实验中重定义，不要跨实验混用内核变量。图像实验完成后，RNN/LSTM 将学习重心从空间结构转向序列关系，再衔接第 03 章的注意力。
 
-DRIVE 视网膜分割数据未随原资料提供；相关单元格需要先从 [DRIVE 官方网站](https://drive.grand-challenge.org/) 获取数据，按 `Notes_IMProcess/DRIVE/` 的训练/测试目录放置。缺失数据时不能完成该分割实验。模型加载示例需要先执行对应训练和保存单元格，不能把名称不同的旧权重视为兼容模型。
+MNIST 保留了一份数据，也可通过 `datasets.MNIST(download=True)` 获取。OpenCV 弹窗需要桌面环境。
 
-`Notes_RNN/StockPrediction243/GatedUnitsInRNN-main` 是保留的历史参考实现，其中训练/验证划分和自定义门控单元有局限；它不是本次测试覆盖的标准 LSTM 实现。优先阅读 Notebook 的 `nn.LSTM` 示例。
+DRIVE 分割数据未随原资料提供，需从 [DRIVE 官方网站](https://drive.grand-challenge.org/) 获取并放到 `Notes_IMProcess/DRIVE/`；这是用户另行下载的实验数据，不是随笔记维护的配图。模型加载示例需先执行对应训练与保存步骤。
+
+`Notes_RNN/StockPrediction243/GatedUnitsInRNN-main` 保留历史参考实现，有数据划分和门控实现局限。Notebook 的股票例子也只是教学演示，不代表验证过的预测系统。
+
+[上一章](../01%20%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/notes.ipynb) | [下一章](../03%20Transformer%E4%B8%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8/notes.ipynb)

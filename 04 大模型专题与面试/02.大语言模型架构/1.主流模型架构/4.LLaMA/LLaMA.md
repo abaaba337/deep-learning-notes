@@ -6,7 +6,7 @@
 - 取消了词嵌入阶段的绝对位置编码，改为在注意力计算前直接对`q, k`进行旋转位置嵌入 **RoPE** 进行相对位置编码。
 
 <div align="center">
-<img src="image/image_Li8zwpP-Yl.png" width=30% height=30%/>
+<img src="../../../images/image_Li8zwpP-Yl.png" width=30% height=30%/>
 </div>
 
 ## 1.1 RMSNorm 归一化函数
@@ -57,14 +57,14 @@ $$
 其中，$σ(x)$ 是 Sigmoid 函数。下图给出了 Swish 激活函数在参数 $β$ 不同取值下的形状。可以看 到当 $β$ 趋近于 0 时，Swish 函数趋近于线性函数 $y = x$，当 $β $趋近于无穷大时，Swish 函数趋近于 ReLU 函数，$β$ 取值为 1 时，Swish 函数是光滑且非单调。LLaMA 中直接将 FFN 中的 ReLU 替换为 SwiGLU，并将隐层维度放缩为$(2/3) ⋅ 4d$。
 
 <div align="center">
-<img src="image/image_KbWpfqtyqV.png" width=70%>
-<img src="image/image_SyfakZa0oX.png" width=70%>
+<img src="../../../images/image_KbWpfqtyqV.png" width=70%>
+<img src="../../../images/image_SyfakZa0oX.png" width=70%>
 </div>
 
 
 ## 1.3 旋转位置嵌入 RoPE
 
-![](image/image_QzGxZVzHBf.png)
+![](../../../images/image_QzGxZVzHBf.png)
 
 在位置编码上，使用旋转位置嵌入（Rotary Positional Embeddings，RoPE）代替原有的绝对位置编码。将待编码的嵌入向量 $\boldsymbol{q}\in\mathbb{R}^{d}$ 每两个元素视为一组（$d$ 为偶数），先考虑最简单的情况，$d=2$，我们知道旋转变换
 
@@ -136,7 +136,7 @@ Alpaca 是在**LLaMA基础上使用52K指令数据精调的预训练模型**，�
 2. 第二步：基于上述种子任务，利用 text-davinci-003 生成更多指令数据；
 3. 第三步：使用爬取下来的 52K 指令数据在 LLaMA 上进行精调，最终得到 Alpaca。
 
-![](image/image_AX8lFJosne.png)
+![](../../../images/image_AX8lFJosne.png)
 
 ## 2.2 Self-instruct 数据构造与指令数据生成
 
@@ -162,13 +162,13 @@ Alpaca 是在**LLaMA基础上使用52K指令数据精调的预训练模型**，�
 }
 ```
 
-![](image/image_HL-FiPNnSG.png)
+![](../../../images/image_HL-FiPNnSG.png)
 
 # 3. LLaMA-2
 
 2023 年 7 月，Meta 推出了LLaMA-2 开源大模型，并且推出了LLaMA-2-Chat对话模型。与一代 LLaMA 主要区别体现在**更多的训练数据、更⻓的上下文窗口、GQA技术**等。
 
-![](image/image_XM9VQqYPki.png)
+![](../../../images/image_XM9VQqYPki.png)
 
 模型结构的变动主要是体现在 **GQA** 和 **FFN** 缩放上
 
@@ -185,6 +185,6 @@ MHA、GQA、MQA的区别和联系，具体的优点如下：
 
 LLaMA-2 中使用了 8 个 KV 映射，即 GQA-8，**GQA 在多数任务上与 MHA 效果相当，且平均效果优于 MQA；GQA 和 MQA 均比 MHA 有更好的吞吐量**。
 
-![](image/image_ia9gxLh7hr.png)
+![](../../../images/image_ia9gxLh7hr.png)
 
 

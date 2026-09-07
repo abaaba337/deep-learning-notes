@@ -4,7 +4,7 @@
 
 **检索增强 LLM ( Retrieval Augmented LLM )**，简单来说，**就是给 LLM 提供外部数据库，对于用户问题 ( Query )，通过一些信息检索 ( Information Retrieval, IR ) 的技术，先从外部数据库中检索出和用户问题相关的信息，然后让 LLM 结合这些相关信息来生成结果**。下图是一个检索增强 LLM 的简单示意图。
 
-![](image/lr3r0h6wjf_GML_ChOo9a.png)
+![](../../images/lr3r0h6wjf_GML_ChOo9a.png)
 
 传统的信息检索工具，比如 Google/Bing 这样的搜索引擎，只有检索能力 ( **Retrieval-only** )，现在 LLM 通过预训练过程，将海量数据和知识嵌入到其巨大的模型参数中，具有记忆能力 ( **Memory-only** )。从这个角度看，检索增强 LLM 处于中间，将 LLM 和传统的信息检索相结合，通过一些信息检索技术将相关信息加载到 LLM 的工作内存 ( **Working Memory** ) 中，即 LLM 的上下文窗口 ( **Context Window** )，亦即 LLM 单次生成时能接受的最大文本输入。
 
@@ -46,7 +46,7 @@ ChatGPT 这类通用的 LLM 预训练阶段利用的大部分都是公开的数�
 
 # 4.几种RAG的调用模式
 
-![](image/image_iDQkbM_wzA.png)
+![](../../images/image_iDQkbM_wzA.png)
 
 **模式一：** 非结构化数据通过Embedding Model把非结构化数据进行embedding存到向量数据库中，然后形成Construct Prompts给到LLM。LLM返回结果给到用户。
 
@@ -69,4 +69,4 @@ ChatGPT 这类通用的 LLM 预训练阶段利用的大部分都是公开的数�
 
 与预训练或微调基础模型等传统方法相比，RAG 提供了一种经济高效的替代方法。RAG 从根本上增强了大语言模型在响应特定提示时直接访问特定数据的能力。为了说明 RAG 与其他方法的区别，请看下图。雷达图具体比较了三种不同的方法：预训练大语言模型、预训练 + 微调 LLM 、预训练 + RAG LLM。
 
-![](image/image_C5NZymFSB9.png)
+![](../../images/image_C5NZymFSB9.png)

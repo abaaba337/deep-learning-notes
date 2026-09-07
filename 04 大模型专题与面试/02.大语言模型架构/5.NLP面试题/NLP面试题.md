@@ -40,7 +40,7 @@ ERT的输入的编码向量（长度是512）是3个嵌入特征的单位和，�
 
 Word2vec有两个变体：
 
-![](image/image_X49t5d33gM.png)
+![](../../images/image_X49t5d33gM.png)
 
 1. `Skip-Gram`：考虑一个包含 `k`个连续项的上下文窗口。然后，跳过其中一个单词，尝试学习一个神经网络，该网络可以获得除跳过的所有术语外的所有术语，并预测跳过的术语。
    因此，如果两个单词在大语料库中反复共享相似的上下文，那么这些术语的嵌入向量将具有相似的向量。
@@ -56,7 +56,7 @@ Word2vec有两个变体：
 
 三种模型中只有BERT表征基于所有层左右两侧语境。
 
-![](image/image_iTMYNBqhpw.png)
+![](../../images/image_iTMYNBqhpw.png)
 
 ### 4.Word2Vec中为什么使用负采样（negtive sample）？
 
@@ -101,7 +101,7 @@ NLP任务的特点：输入是个一维线性序列；输入不定长；单词�
 
 RNN的结构天然适配解决NLP的问题，NLP的输入往往是个不定长的线性序列句子，而RNN本身结构就是个可以接纳不定长输入的由前向后进行信息线性传导的网络结构，而在LSTM引入三个门后，对于捕获长距离特征也是非常有效的。所以RNN特别适合NLP这种线形序列应用场景，这是RNN为何在NLP界如此流行的根本原因。
 
-![](image/image_g_anBE563B.png)
+![](../../images/image_g_anBE563B.png)
 
 RNN在新时代面临的两个问题：
 
@@ -114,7 +114,7 @@ CNN捕获的特征其实的单词的 `k-gram`片段信息，`k`的大小决定�
 
 目前NLP界主流的CNN：
 
-![](image/image_m5T92pMvsC.png)
+![](../../images/image_m5T92pMvsC.png)
 
 通常由1-D卷积层来叠加深度，使用Skip Connection来辅助优化，也可以引入Dilated CNN等手段。
 
@@ -122,7 +122,7 @@ CNN的卷积层其实是保留了相对位置信息的，CNN的并行计算能�
 
 #### Transformer
 
-![](image/image_1vuLUX3FGo.png)
+![](../../images/image_1vuLUX3FGo.png)
 
 自然语言一般是个不定长的句子，那么这个不定长问题怎么解决呢？Transformer做法跟CNN是类似的，一般设定输入的最大长度，如果句子没那么长，则用Padding填充，这样整个模型输入起码看起来是定长的了。
 

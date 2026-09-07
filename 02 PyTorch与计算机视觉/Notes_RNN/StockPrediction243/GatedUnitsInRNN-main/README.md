@@ -44,4 +44,4 @@ class CellLSTM(nn.Module):
 ```
 
 # LSTM Training results :
-![LSTM results](./images/results_lstm.png)
+![LSTM results](./../../../images/results_lstm.png)

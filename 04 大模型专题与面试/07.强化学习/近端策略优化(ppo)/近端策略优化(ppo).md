@@ -165,13 +165,13 @@ $$
 
 详细看看clip函数到底算的是什么。
 
-![](image/image_ttC1i0sOdU.png)
+![](../../images/image_ttC1i0sOdU.png)
 
 > 图1. clip函数
 
 横轴是$\frac{p_{\theta}\left(a_{t} \mid s_{t}\right)}{p_{\theta^{k}}\left(a_{t} \mid s_{t}\right)}$，纵轴是裁剪函数的输出。
 
-![](image/image_JE9uuZbeIs.png)
+![](../../images/image_JE9uuZbeIs.png)
 
 > 图2. clip函数详细图
 

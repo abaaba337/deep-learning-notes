@@ -1,6 +1,6 @@
 # Transformer 架构细节
 
-![](image/image_N4T6xFNXi8.png)
+![](../../../images/image_N4T6xFNXi8.png)
 
 ## 1. Transformer 各个模块的作用
 

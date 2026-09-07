@@ -6,7 +6,7 @@
 
 以下图Huggingface Inference API为例（其他框架类似），这里重点介绍$top\_k$,$top\_p$,$temperature$,$repetition\_penalty$参数，以及$greedy~search$和$beam~search$。
 
-![](image/image_LK3V11ETTY.png)
+![](../../images/image_LK3V11ETTY.png)
 
 ## 2.背景介绍
 
@@ -14,15 +14,15 @@
 
 如下图所示，将输入“`a robot must obey the orders given it`”对应的embedding输入Transformer Decoding后，在最后的Transformer Decoder之后，每个Token对应的位置相应的也会生成一个新的embedding，然后使用最后一个Token“`it`”**对应的新生成的embedding（蓝色）** 来生成新的Token“`Okay`”，之后将新的Token“`Okay`”也作为输入，进一步根据“`Okay`”对应位置新生成的embedding来生成新的Token“`human`”，以此类推：
 
-![](<image/640 (1)_5Y5ZVQhUfP.gif>)
+![](<../../images/640 (1)_5Y5ZVQhUfP.gif>)
 
 那么怎么**根据新生成的embedding**来生成下一个Token呢，如下图所示，具体来说是**让新生成的embedding与Token Embeddings矩阵相乘**（也就是和每个Token对应的embedding向量做内积），得到和词表中每个Token的相似性得分（`logits`），然后基于这个得分即可以选择生成新的Token（比如直接取得分最高的Token）。
 
-![](image/image_qIo2XMf4Dy.png)
+![](../../images/image_qIo2XMf4Dy.png)
 
 其中的Token Embeddings行数即为模型词表中Token的个数，列数即为embedding的维度，也就是每个Token对应一个embedding向量，如下图所示：
 
-![](image/image_pZHPwzdINM.png)
+![](../../images/image_pZHPwzdINM.png)
 
 对于LLM的推理过程详情可以参考这两篇博文：
 
@@ -40,7 +40,7 @@ GreedySearch（贪心搜索）的思路非常简单，**就是每次都从相似
 -   [ ] **Step3**：使用“`human`”来计算相似性得分（logits），最终“`.`”对应的得分0.78最高，所以选择“`.`”作为下一个Token。
 -   [ ] **Step4**：使用“`.`”来计算相似性得分（logits），最终“`EOS`”对应的得分0.90最高，所以终止生成。
 
-![](image/image_EZwLm0WLPO.png)
+![](../../images/image_EZwLm0WLPO.png)
 
 在推理阶段模型的权重都是确定的，并且也不会有dropout等其他随机性（忽略不可抗的硬件计算误差，比如并行规约求和的累积误差等），因此**如果是greedy search，则对于同一个输入，多次运行后模型的输出结果应该完全一致**。
 
@@ -90,7 +90,7 @@ BeamSearch是GreedySearch的改进版本，**其不再是每次都取得分最�
 -   [ ] “a robot must obey the orders given it **. the human.**”，对应得分0.5515
 -   [ ] **从以上4个序列中选出概率最高的2个保留**，由于此时得分最高的“a robot must obey the orders given it Okay human.”已经生成终止符Token“`EOS`”，所以可以在此终止，因为不会有其他得分更高的序列。
 
-![](image/image_5C0Ca7_5gB.png)
+![](../../images/image_5C0Ca7_5gB.png)
 
 由于beam search会同时保留多个序列，因此**就更容易得到得分更高的序列，并且beam\_size越大，获得更高得分的概率越高**。然而从上面也可以看出，每个step都需要进行beam\_size次前向计算（当然可以使用batch计算，但总的计算量不变），也就是计算量会扩大beam\_size倍。另一方面，LLM推理中一般都会使用Key、Valuecache，这也就会进一步增大Key、Valuecache的内存占用，同时增加了Key、Valuecache管理的复杂度。这也就是在LLM推理中为什么比较少使用beam search。
 
@@ -106,7 +106,7 @@ BeamSearch是GreedySearch的改进版本，**其不再是每次都取得分最�
 -   [ ] **Step2**：使用“`Okay`”来计算相似性得分（logits），选出得分最高的3个Token：`[“human”、“robot”、“the”]`，对应的权重为：`[0.89,0.65,0.72]`，使用该权重进行随机采样，获得新Token“`the`”，事实上，“`the`”并不是得分最高的。
 -   [ ] 以此类推，最终得到输出序列：“a robot must obey the orders given it **Okay the human.**”
 
-![](image/image_zYlCHt9cls.png)
+![](../../images/image_zYlCHt9cls.png)
 
 可以看出，**如果top\_k=1，则对应greedysearch。**
 
@@ -121,7 +121,7 @@ BeamSearch是GreedySearch的改进版本，**其不再是每次都取得分最�
 -   [ ] **Step3**：使用“`the`”来计算相似性得分（logits），选出累积得分超过2.2的Token：`[“human”、“obey”、“robot”、“.”]`，对应的权重为：`[0.82,0.41,0.53,0.48]`，使用该权重进行随机采样，获得新Token“`human`”，事实上，“`human`”并不是得分最高的，并且此时选出了4个候选Token。
 -   [ ] 以此类推，最终得到输出序列：“a robot must obey the orders given it Okay the human.”
 
-![](image/image_wXqz37qjwH.png)
+![](../../images/image_wXqz37qjwH.png)
 
 虽然从理论上讲，**top\_p似乎比top\_k更优雅，但这两种方法在实践中都很好用。top\_p也可以与top\_k结合使用，这可以避免分数非常低的Token**，同时提供一些动态选择的空间。
 
@@ -148,7 +148,7 @@ $$
 -   [ ] 蓝色：`t<1`，减小随机性，并且t越小，随机性越小
 -   [ ] 红色：`t>1`，增大随机性，并且t越大，随机性越大
 
-![](image/image_owrlRKptiN.png)
+![](../../images/image_owrlRKptiN.png)
 
 ## 8.repetition\_penalty（重复惩罚）
 
@@ -166,11 +166,11 @@ $$
 
 还是使用上一部分的示例，假设得到的候选Token为：`[“human”、“obey”、“robot”、“EOS”]`，对应的分数为：`[0.92,0.11,0.33,0.04]`，令`g=[“robot”,“it”]`，也就是这些Token已经生成过，对应的惩罚系数`θ=3`，可以看出，“`robot`”对应的采样概率都在降低：
 
-![](image/image_7t_2F8_dv_.png)
+![](../../images/image_7t_2F8_dv_.png)
 
 如果希望鼓励出现重复，可以设置惩罚系数`θ<1`，比如，令`θ=0.5`，可以看出，“`robot`”对应的采样概率都在增加：
 
-![](image/image_BwNP8uWX2Z.png)
+![](../../images/image_BwNP8uWX2Z.png)
 
 ## 9.总结
 
