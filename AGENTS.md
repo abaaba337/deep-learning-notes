@@ -9,3 +9,7 @@
 - 执行 `python scripts/check_notes.py` 和 `python scripts/check_examples.py`；不以重型训练代替回归检查。
 - 采用 ponytail full：复用标准库和原生接口，最小修改；完成代码修改后按 ponytail-review 检查 diff。
 - 不提交虚拟环境、运行缓存、登录凭据或编辑器个人配置。保留第三方材料来源，不将第三方内容统一宣称为原创。
+
+- `practices/` 下每个实践可有自己的 notes.ipynb。模型权重只放根目录 models；运行输出只写根目录 outputs；下载数据/安装包不提交。
+- 提交前清空 Notebook outputs/execution_count，保留正文、代码和稳定 cell ID。代码注释中的结果不冒充实测。
+- 新实践回归执行 `python scripts/check_practices.py`，不下载大模型，不默认发出 API 请求。

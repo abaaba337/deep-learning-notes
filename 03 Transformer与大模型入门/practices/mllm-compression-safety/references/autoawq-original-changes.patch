@@ -1,0 +1,1550 @@
+--- a/awq/models/auto.py
++++ b/awq/models/auto.py
+@@ -73,11 +73,13 @@
+         model_type = check_and_get_model_type(
+             model_path, trust_remote_code, **model_init_kwargs
+         )
+-
++        
++        # print(model_type)
++        model_types_wo_use_cache = ["llava", "llava_next"] ## * ##
+         if model_init_kwargs.get("low_cpu_mem_usage") is None:
+             model_init_kwargs["low_cpu_mem_usage"] = low_cpu_mem_usage
+-        if model_init_kwargs.get("use_cache") is None:
+-            model_init_kwargs["use_cache"] = use_cache
++        if (model_init_kwargs.get("use_cache") is None) and (model_type not in model_types_wo_use_cache): ## * ##
++            model_init_kwargs["use_cache"] = use_cache 
+ 
+         return AWQ_CAUSAL_LM_MODEL_MAP[model_type].from_pretrained(
+             model_path,
+--- a/awq/models/base.py
++++ b/awq/models/base.py
+@@ -93,16 +93,10 @@
+         self,
+         model: Annotated[PreTrainedModel, Doc("The pretrained or quantized model.")],
+         model_type: Annotated[str, Doc("The model type, found in config.json.")],
+-        is_quantized: Annotated[
+-            bool, Doc("Indicates if the current model is quantized.")
+-        ],
++        is_quantized: Annotated[bool, Doc("Indicates if the current model is quantized.")],
+         config: Annotated[PretrainedConfig, Doc("The config of the model.")],
+-        quant_config: Annotated[
+-            AwqConfig, Doc("The quantization config of the model.")
+-        ],
+-        processor: Annotated[
+-            BaseImageProcessor, Doc("An optional processor, e.g. for vision models.")
+-        ],
++        quant_config: Annotated[AwqConfig, Doc("The quantization config of the model.")],
++        processor: Annotated[BaseImageProcessor, Doc("An optional processor, e.g. for vision models.")]
+     ):
+         """The base model for all AutoAWQ models."""
+         super().__init__()
+@@ -123,76 +117,48 @@
+         return self.model(*args, **kwargs)
+ 
+     def generate(self, *args, **kwargs):
+-        """A generate function that mimics the HF generate function."""
++        """A generate function that mimics the HF generate function.
++        generate(
++        self,
++        inputs: Optional[torch.Tensor] = None,
++        generation_config: Optional[GenerationConfig] = None,
++        logits_processor: Optional[LogitsProcessorList] = None,
++        stopping_criteria: Optional[StoppingCriteriaList] = None,
++        prefix_allowed_tokens_fn: Optional[Callable[[int, torch.Tensor], List[int]]] = None,
++        synced_gpus: Optional[bool] = None,
++        assistant_model: Optional["PreTrainedModel"] = None,
++        streamer: Optional["BaseStreamer"] = None,
++        negative_prompt_ids: Optional[torch.Tensor] = None,
++        negative_prompt_attention_mask: Optional[torch.Tensor] = None,
++        **kwargs)"""
++        
+         with torch.inference_mode():
+             return self.model.generate(*args, **kwargs)
+ 
+     @torch.no_grad()
+     def quantize(
+         self,
+-        tokenizer: Annotated[
+-            PreTrainedTokenizer, Doc("The tokenizer to use for quantization.")
+-        ] = None,
+-        quant_config: Annotated[
+-            Dict, Doc("The quantization config you want to use.")
+-        ] = {},
+-        calib_data: Annotated[
+-            Union[str, List[str]],
+-            Doc(
+-                "The calibration dataset. Either a string pointing to Huggingface or a list of preloaded examples."
+-            ),
+-        ] = "pileval",
++        tokenizer: Annotated[PreTrainedTokenizer, Doc("The tokenizer to use for quantization.")] = None,
++        quant_config: Annotated[Dict, Doc("The quantization config you want to use.")] = {},
++        calib_data: Annotated[Union[str, List[str]], Doc("The calibration dataset. Either a string pointing to Huggingface or a list of preloaded examples.")] = "pileval",
+         split: Annotated[str, Doc("The split of calib_data.")] = "train",
+         text_column: Annotated[str, Doc("The text column of calib_data.")] = "text",
+-        duo_scaling: Annotated[
+-            bool, Doc("Whether to scale using both w/x or just x.")
+-        ] = True,
+-        export_compatible: Annotated[
+-            bool,
+-            Doc(
+-                "This argument avoids real quantization by only applying the scales without quantizing down to FP16."
+-            ),
+-        ] = False,
+-        apply_clip: Annotated[
+-            bool,
+-            Doc(
+-                "Whether to apply clipping to the model during quantization. Some models may perform better with this set to False."
+-            ),
+-        ] = True,
+-        n_parallel_calib_samples: Annotated[
+-            int,
+-            Doc(
+-                "The number of parallel samples to run through the model. "
+-                "A high number of parallel samples can result in OOM during quantization if max_calib_samples is high enough. "
+-                "If None, runs through all samples at the same time. "
+-                "You can set this to a low number for more memory efficient quantization."
+-            ),
+-        ] = None,
+-        max_calib_samples: Annotated[
+-            int, Doc("The maximum number of samples to run through the model.")
+-        ] = 128,
+-        max_calib_seq_len: Annotated[
+-            int,
+-            Doc(
+-                "The maximum sequence length of the calibration dataset. Discard samples greater than max_calib_seq_len."
+-            ),
+-        ] = 512,
+-        max_chunk_memory: Annotated[
+-            int,
+-            Doc(
+-                "The loss computation and per-channel mean is optimized into chunked computations."
+-                " Adjust this parameter to increase or decrease memory usage for these computations."
+-                " Default is 1GB (1024 * 1024 * 1024)."
+-            ),
+-        ] = 1024
+-        * 1024
+-        * 1024,
+-        quantizer_cls: Annotated[
+-            AwqQuantizer,
+-            Doc("If you want to customize the quantization class, you can use AwqQuantizer as a base class.")
+-        ] = AwqQuantizer,
+-        **kwargs,
+-    ):
++        duo_scaling: Annotated[bool, Doc("Whether to scale using both w/x or just x.")] = True,
++        export_compatible: Annotated[bool, Doc("This argument avoids real quantization by only applying the scales without quantizing down to FP16.")] = False,
++        apply_clip: Annotated[bool, Doc("Whether to apply clipping to the model during quantization. Some models may perform better with this set to False.")] = True,
++        n_parallel_calib_samples: Annotated[int, Doc("The number of parallel samples to run through the model. "
++                                                     "A high number of parallel samples can result in OOM during quantization if max_calib_samples is high enough. "
++                                                     "If None, runs through all samples at the same time. "
++                                                     "You can set this to a low number for more memory efficient quantization.")] = None,
++        max_calib_samples: Annotated[int, Doc("The maximum number of samples to run through the model.")] = 128,
++        max_calib_seq_len: Annotated[int, Doc("The maximum sequence length of the calibration dataset. Discard samples greater than max_calib_seq_len.")] = 512,
++        max_chunk_memory: Annotated[int, Doc("The loss computation and per-channel mean is optimized into chunked computations."
++                                             " Adjust this parameter to increase or decrease memory usage for these computations."
++                                             " Default is 1GB (1024 * 1024 * 1024)."),] = 1024 * 1024 * 1024,
++        quantizer_cls: Annotated[AwqQuantizer, Doc("If you want to customize the quantization class, you can use AwqQuantizer as a base class.")] = AwqQuantizer,
++        **kwargs
++        ):
++        
+         """
+         The main quantization function that you can use to quantize your model.
+ 
+@@ -268,13 +234,10 @@
+     def save_quantized(
+         self,
+         save_dir: Annotated[str, Doc("The directory to save your model to.")],
+-        safetensors: Annotated[
+-            bool, Doc("Whether to save the model as safetensors or torch files.")
+-        ] = True,
+-        shard_size: Annotated[
+-            str, Doc("The shard size for sharding large models into multiple chunks.")
+-        ] = "5GB",
+-    ):
++        safetensors: Annotated[bool, Doc("Whether to save the model as safetensors or torch files.")] = True,
++        shard_size: Annotated[str, Doc("The shard size for sharding large models into multiple chunks.")] = "5GB"
++        ):
++        
+         save_dir = save_dir[:-1] if save_dir[-1] == "/" else save_dir
+ 
+         # Save model
+@@ -295,10 +258,9 @@
+             self.processor.save_pretrained(save_dir)
+ 
+         # Remove empty state dict
+-        default_paths = [
+-            f"{save_dir}/model.safetensors",
+-            f"{save_dir}/pytorch_model.bin",
+-        ]
++        default_paths = [f"{save_dir}/model.safetensors",
++                         f"{save_dir}/pytorch_model.bin"]
++        
+         for path in default_paths:
+             if os.path.exists(path):
+                 os.remove(path)
+@@ -317,48 +279,19 @@
+         self,
+         model_path: Annotated[str, Doc("A Huggingface path or local path to a model.")],
+         model_type: Annotated[str, Doc("The model type, loaded from config.json.")],
+-        torch_dtype: Annotated[
+-            torch.dtype,
+-            Doc(
+-                "The dtype to load the model as. May not work with other values than float16."
+-            ),
+-        ] = torch.float16,
+-        trust_remote_code: Annotated[
+-            bool,
+-            Doc(
+-                "Useful for Huggingface repositories that have not been integrated into transformers yet."
+-            ),
+-        ] = True,
+-        safetensors: Annotated[
+-            bool, Doc("Whether to download/load safetensors instead of torch weights.")
+-        ] = True,
+-        device_map: Annotated[
+-            Union[str, Dict],
+-            Doc(
+-                "A device map that will be passed onto the model loading method from transformers."
+-            ),
+-        ] = "auto",
+-        download_kwargs: Annotated[
+-            Dict,
+-            Doc("Used for configure download model"),
+-        ] = None,
+-        **model_init_kwargs: Annotated[
+-            Dict,
+-            Doc(
+-                "Additional kwargs that are passed to the model during initialization."
+-            ),
+-        ],
++        torch_dtype: Annotated[torch.dtype, Doc("The dtype to load the model as. May not work with other values than float16.")] = torch.float16,
++        trust_remote_code: Annotated[bool, Doc("Useful for Huggingface repositories that have not been integrated into transformers yet.")] = True,
++        safetensors: Annotated[bool, Doc("Whether to download/load safetensors instead of torch weights.")] = True,
++        device_map: Annotated[Union[str, Dict], Doc("A device map that will be passed onto the model loading method from transformers.")] = "auto",
++        download_kwargs: Annotated[Dict, Doc("Used for configure download model")] = None,
++        **model_init_kwargs: Annotated[Dict, Doc("Additional kwargs that are passed to the model during initialization.")]
+     ):
++
+         """A method for initialization of pretrained models, usually in FP16."""
+         # Get weights path and quant config
+-        model_weights_path, config, quant_config = self._load_config(
+-            self,
+-            model_path,
+-            "",
+-            safetensors,
+-            trust_remote_code=trust_remote_code,
+-            download_kwargs=download_kwargs,
+-        )
++        model_weights_path, config, quant_config = self._load_config(self, model_path, "", safetensors,
++                                                                     trust_remote_code=trust_remote_code,
++                                                                     download_kwargs=download_kwargs)
+ 
+         target_cls_name = TRANSFORMERS_AUTO_MAPPING_DICT[config.model_type]
+         target_cls = getattr(transformers, target_cls_name)
+@@ -366,154 +299,78 @@
+         processor = None
+         if target_cls_name == "AutoModelForVision2Seq":
+             processor = AutoProcessor.from_pretrained(model_weights_path)
+-
++            
+         # If not quantized, must load with AutoModelForCausalLM
+-        model = target_cls.from_pretrained(
+-            model_weights_path,
+-            trust_remote_code=trust_remote_code,
+-            torch_dtype=torch_dtype,
+-            use_safetensors=safetensors,
+-            device_map=device_map,
+-            **model_init_kwargs,
+-        )
+-
++        model = target_cls.from_pretrained(model_weights_path,
++                                           trust_remote_code=trust_remote_code,
++                                           torch_dtype=torch_dtype,
++                                           use_safetensors=safetensors,
++                                           device_map=device_map,
++                                           **model_init_kwargs)
+         model.eval()
+ 
+-        return self(
+-            model,
+-            model_type,
+-            is_quantized=False,
+-            config=config,
+-            quant_config=quant_config,
+-            processor=processor,
+-        )
++        return self(model, model_type, is_quantized=False,
++                    config=config, quant_config=quant_config, processor=processor)
+ 
+     @classmethod
+     def from_quantized(
+         self,
+         model_path: Annotated[str, Doc("A Huggingface path or local path to a model.")],
+         model_type: Annotated[str, Doc("The model type, loaded from config.json.")],
+-        model_filename: Annotated[
+-            str, Doc("Load a specific model's filename by specifying this argument.")
+-        ] = "",
+-        max_seq_len: Annotated[
+-            int,
+-            Doc(
+-                "The maximum sequence cached sequence length of the model. Larger values may increase loading time and memory usage."
+-            ),
+-        ] = None,
+-        torch_dtype: Annotated[
+-            torch.dtype,
+-            Doc(
+-                "The dtype to load the model as. May not work with other values than float16."
+-            ),
+-        ] = torch.float16,
+-        trust_remote_code: Annotated[
+-            bool,
+-            Doc(
+-                "Useful for Huggingface repositories that have not been integrated into transformers yet."
+-            ),
+-        ] = True,
+-        safetensors: Annotated[
+-            bool, Doc("Whether to download/load safetensors instead of torch weights.")
+-        ] = True,
+-        fuse_layers: Annotated[
+-            bool,
+-            Doc(
+-                "Whether to use fused/optimized combination of layers for increased speed."
+-            ),
+-        ] = True,
+-        use_exllama: Annotated[
+-            bool, Doc("Whether to map the weights to ExLlamaV1 kernels.")
+-        ] = False,
+-        use_exllama_v2: Annotated[
+-            bool, Doc("Whether to map the weights to ExLlamaV2 kernels.")
+-        ] = False,
+-        use_ipex: Annotated[
+-            bool, Doc("Whether to map the weights to ipex kernels for CPU and XPU device.")
+-        ] = False,
+-        device_map: Annotated[
+-            Union[str, Dict],
+-            Doc(
+-                "A device map that will be passed onto the model loading method from transformers."
+-            ),
+-        ] = "balanced",
+-        max_memory: Annotated[
+-            Dict[Union[int, str], Union[int, str]],
+-            Doc(
+-                'A dictionary device identifier to maximum memory which will be passed onto the model loading method from transformers. For example：{0: "4GB",1: "10GB"'
+-            ),
+-        ] = None,
+-        offload_folder: Annotated[
+-            str,
+-            Doc("The folder ot offload the model to."),
+-        ] = None,
+-        download_kwargs: Annotated[
+-            Dict,
+-            Doc("Used for configure download model"),
+-        ] = None,
+-        **config_kwargs: Annotated[
+-            Dict,
+-            Doc(
+-                "Additional kwargs that are passed to the config during initialization."
+-            ),
+-        ],
++        model_filename: Annotated[str, Doc("Load a specific model's filename by specifying this argument.")] = "",
++        max_seq_len: Annotated[int, Doc("The maximum sequence cached sequence length of the model. Larger values may increase loading time and memory usage.")] = None,
++        torch_dtype: Annotated[torch.dtype, Doc("The dtype to load the model as. May not work with other values than float16.")] = torch.float16,
++        trust_remote_code: Annotated[bool, Doc("Useful for Huggingface repositories that have not been integrated into transformers yet.")] = True,
++        safetensors: Annotated[bool, Doc("Whether to download/load safetensors instead of torch weights.")] = True,
++        fuse_layers: Annotated[bool, Doc("Whether to use fused/optimized combination of layers for increased speed.")] = True,
++        use_exllama: Annotated[bool, Doc("Whether to map the weights to ExLlamaV1 kernels.")] = False,
++        use_exllama_v2: Annotated[bool, Doc("Whether to map the weights to ExLlamaV2 kernels.")] = False,
++        use_ipex: Annotated[bool, Doc("Whether to map the weights to ipex kernels for CPU and XPU device.")] = False,
++        device_map: Annotated[Union[str, Dict], Doc("A device map that will be passed onto the model loading method from transformers.")] = "balanced",
++        max_memory: Annotated[Dict[Union[int, str], Union[int, str]], Doc('A dictionary device identifier to maximum memory which will be passed onto the model loading method from transformers. For example：{0: "4GB",1: "10GB"')] = None,
++        offload_folder: Annotated[str, Doc("The folder ot offload the model to.")] = None,
++        download_kwargs: Annotated[Dict, Doc("Used for configure download model")] = None,
++        **config_kwargs: Annotated[Dict, Doc("Additional kwargs that are passed to the config during initialization.")],
+     ):
+         """A method for initialization of a quantized model, usually in INT4."""
+-        # [STEP 1-2] Load weights path and configs
+-        model_weights_path, config, quant_config = self._load_config(
+-            self,
+-            model_path,
+-            model_filename,
+-            safetensors,
+-            trust_remote_code,
+-            max_seq_len=max_seq_len,
+-            download_kwargs=download_kwargs,
+-            **config_kwargs,
+-        )
+-
++        # [STEP 1-2] Load weights path and configs (original model config and quant config)
++        model_weights_path, config, quant_config = self._load_config(self, model_path, model_filename,
++                                                                     safetensors, trust_remote_code,
++                                                                     max_seq_len=max_seq_len, download_kwargs=download_kwargs,
++                                                                     **config_kwargs)
++
++        # [STEP 3] Load the original model from transformers
+         target_cls_name = TRANSFORMERS_AUTO_MAPPING_DICT[config.model_type]
+         target_cls = getattr(transformers, target_cls_name)
+-
+-        # [STEP 3] Load model
++        processor = None                                                  ## * ##
++        if target_cls_name == "AutoModelForVision2Seq":                   ## * ##
++            processor = AutoProcessor.from_pretrained(model_weights_path) ## * ##
++            
++            
+         with init_empty_weights():
+-            model = target_cls.from_config(
+-                config=config,
+-                torch_dtype=torch_dtype,
+-                trust_remote_code=trust_remote_code,
+-            )
+-
++            model = target_cls.from_config(config=config, torch_dtype=torch_dtype, trust_remote_code=trust_remote_code)
++
++        # Manage device
+         best_device = get_best_device()
+         use_ipex = use_ipex or best_device in ["cpu", "xpu:0"]
+         if use_ipex and not ipex_available:
+-            raise ImportError(
+-                "Please install intel_extension_for_pytorch with "
+-                "`pip install intel_extension_for_pytorch` for 'ipex' kernel!"
+-            )
+-        # Prepare WQLinear layers, replace nn.Linear
+-        self._load_quantized_modules(
+-            self,
+-            model,
+-            quant_config,
+-            quant_config.version,
+-            use_exllama=use_exllama,
+-            use_exllama_v2=use_exllama_v2,
+-            use_ipex=use_ipex,
+-        )
+-
++            raise ImportError("Please install intel_extension_for_pytorch with "
++                              "`pip install intel_extension_for_pytorch` for 'ipex' kernel!")
++            
++        # [STEP 4] Prepare WQLinear layers, replace nn.Linear
++        self._load_quantized_modules(self, model, quant_config, quant_config.version,
++                                     use_exllama=use_exllama, use_exllama_v2=use_exllama_v2,
++                                     use_ipex=use_ipex)
+         model.tie_weights()
+ 
+-        # loads the weights into modules and distributes
+-        # across available devices automatically
+-        load_checkpoint_and_dispatch(
+-            model,
+-            checkpoint=model_weights_path,
+-            device_map=device_map,
+-            max_memory=max_memory,
+-            no_split_module_classes=[self.layer_type],
+-            offload_folder=offload_folder,
+-            dtype=torch_dtype,
+-        )
++        # [STEP 5] loads the weights into modules and distributes across available devices automatically
++        load_checkpoint_and_dispatch(model,
++                                     checkpoint=model_weights_path,
++                                     device_map=device_map,
++                                     max_memory=max_memory,
++                                     no_split_module_classes=[self.layer_type],
++                                     offload_folder=offload_folder,
++                                     dtype=torch_dtype)
+ 
+         # Dispath to devices
+         awq_ext, msg = try_import("awq_ext")
+@@ -541,25 +398,14 @@
+ 
+         model.eval()
+ 
+-        return self(
+-            model,
+-            model_type,
+-            is_quantized=True,
+-            config=config,
+-            quant_config=quant_config,
+-            processor=None,
+-        )
+-
+-    def _load_config(
+-        self,
+-        model_path,
+-        model_filename,
+-        safetensors=True,
+-        trust_remote_code=True,
+-        max_seq_len=4096,
+-        download_kwargs=None,
+-        **config_kwargs,
+-    ):
++        return self(model, model_type, is_quantized=True,
++                    config=config, quant_config=quant_config, processor=processor)
++
++    def _load_config(self, model_path, model_filename,
++                     safetensors=True, trust_remote_code=True,
++                     max_seq_len=4096, download_kwargs=None,
++                     **config_kwargs):
++        
+         # [STEP 1] Download model if path is not a directory
+         if not os.path.isdir(model_path):
+             ignore_patterns = ["*msgpack*", "*h5*", "optimizer.pt", "*.onnx*"]
+@@ -579,9 +425,7 @@
+                 elif isinstance(download_kwargs_ignore_patterns, list):
+                     ignore_patterns.extend(download_kwargs_ignore_patterns)
+ 
+-            model_path = snapshot_download(
+-                model_path, ignore_patterns=ignore_patterns, **download_kwargs
+-            )
++            model_path = snapshot_download(model_path, ignore_patterns=ignore_patterns, **download_kwargs)
+ 
+         if model_filename != "":
+             model_weights_path = model_path + f"/{model_filename}"
+@@ -594,9 +438,7 @@
+ 
+         # Load model config and set max generation length
+         if max_seq_len is None and hasattr(self, "max_seq_len_key"):
+-            config = AutoConfig.from_pretrained(
+-                model_path, trust_remote_code=trust_remote_code, **config_kwargs
+-            )
++            config = AutoConfig.from_pretrained(model_path, trust_remote_code=trust_remote_code, **config_kwargs)
+             config.max_seq_len = getattr(config, self.max_seq_len_key, 2048)
+             # To add the generate support for Multi-modal models as well
+             if hasattr(config, "text_config"):
+@@ -612,30 +454,23 @@
+ 
+         return model_weights_path, config, quant_config
+ 
+-    def _load_quantized_modules(
+-        self, model, quant_config, version, use_exllama, use_exllama_v2, use_ipex=False
+-    ):
++    def _load_quantized_modules(self, model, quant_config, version, use_exllama, use_exllama_v2, use_ipex=False):
++        
+         # Real quantization of weights
+-        assert not (
+-            version == "gemv" and (use_exllama or use_exllama_v2 or use_ipex)
+-        ), "Exllama kernels only support GEMM version."
++        assert not (version == "gemv" and (use_exllama or use_exllama_v2 or use_ipex)), "Exllama kernels only support GEMM version."
+ 
+         # Get blocks of model
+         layers = self.get_model_layers(model)
+ 
+         for i in tqdm(range(len(layers)), desc="Replacing layers..."):
++            
++            # Get every linear layer in a block and Filter out the linear layers we don't want to include
+             layer = layers[i]
+-
+-            # Get every linear layer in a block
+             named_linears = get_named_linears(layer)
+-
+-            # Filter out the linear layers we don't want to include
+-            named_linears = exclude_layers_to_not_quantize(
+-                named_linears, quant_config.modules_to_not_convert
+-            )
++            named_linears = exclude_layers_to_not_quantize(named_linears, quant_config.modules_to_not_convert)
+ 
+             # Replace activation functions
+-            self._scale_activations(self, layer)
++            self._scale_activations(self, layer) 
+ 
+             # Replace nn.Linear with WQLinear
+             for name, module in named_linears.items():
+@@ -654,10 +489,7 @@
+                 elif version == "gemv_fast":
+                     q_linear_module = WQLinear_GEMVFast
+ 
+-
+-                q_linear = q_linear_module.from_linear(
+-                    module, quant_config.w_bit, quant_config.q_group_size, True
+-                )
++                q_linear = q_linear_module.from_linear(module, quant_config.w_bit, quant_config.q_group_size, True) # initialize WQLinear
+                 q_linear.to(next(layer.parameters()).device)
+                 set_op_by_name(layer, name, q_linear)
+ 
+@@ -667,7 +499,7 @@
+ 
+     @staticmethod
+     def _scale_activations(self, layer):
+-        scale_dict = self.get_act_for_scaling(layer)
++        scale_dict = self.get_act_for_scaling(layer) # AWQForCausalLM
+ 
+         if scale_dict["is_scalable"]:
+             if not isinstance(scale_dict["scale_layer"], ScaledActivation):
+--- a/awq/modules/linear/gemm.py
++++ b/awq/modules/linear/gemm.py
+@@ -129,47 +129,33 @@
+         # quick sanity check (make sure aligment)
+         assert self.in_features % self.group_size == 0
+         assert out_features % (32 // self.w_bit) == 0
+-
+-        self.register_buffer(
+-            "qweight",
+-            torch.zeros(
+-                (in_features, out_features // (32 // self.w_bit)),
+-                dtype=torch.int32,
+-                device=dev,
+-            ),
+-        )
+-        self.register_buffer(
+-            "qzeros",
+-            torch.zeros(
+-                (in_features // self.group_size, out_features // (32 // self.w_bit)),
+-                dtype=torch.int32,
+-                device=dev,
+-            ),
+-        )
+-        self.register_buffer(
+-            "scales",
+-            torch.zeros(
+-                (in_features // self.group_size, out_features),
+-                dtype=torch.float16,
+-                device=dev,
+-            ),
+-        )
++        
++        '''
++        缓冲区通过 self.register_buffer(name, value) 方法注册到模型中。
++        注册后，缓冲区的数据会成为模型的一部分，并在模型保存和加载时自动处理。
++        缓冲区的数据不会参与梯度计算，因此在反向传播过程中不会更新。
++        通过 buffer 注册的变量会被保存在 state_dict 中，方便保存，而像 self.name = value 这样直接赋值的变量
++        不会被保存。
++        调用方法: self.name
++        '''
++
++        self.register_buffer("qweight",
++                             torch.zeros((in_features, out_features // (32 // self.w_bit)), dtype=torch.int32, device=dev))
++        
++        self.register_buffer("qzeros",
++                             torch.zeros((in_features // self.group_size, out_features // (32 // self.w_bit)), dtype=torch.int32, device=dev))
++        
++        self.register_buffer("scales", 
++                             torch.zeros((in_features // self.group_size, out_features), dtype=torch.float16, device=dev))
++        
+         if bias:
+-            self.register_buffer(
+-                "bias",
+-                torch.zeros(
+-                    (out_features),
+-                    dtype=torch.float16,
+-                    device=dev,
+-                ),
+-            )
++            self.register_buffer("bias", torch.zeros((out_features), dtype=torch.float16, device=dev))
+         else:
+             self.bias = None
+-
++            
+     @classmethod
+-    def from_linear(
+-        cls, linear, w_bit, group_size, init_only=False, scales=None, zeros=None
+-    ):
++    # 类方法可以作为辅助方法，提供与类相关的功能，而不需要实例化对象。例如，可以用于验证数据或执行与类相关的计算。
++    def from_linear(cls, linear, w_bit, group_size, init_only=False, scales=None, zeros=None):
+         awq_linear = cls(
+             w_bit,
+             group_size,
+@@ -193,27 +179,24 @@
+ 
+         intweight = []
+         for idx in range(awq_linear.in_features):
++            # idx//group_size: the groups that elements in feature idx belong to
+             intweight.append(
+-                torch.round(
+-                    (linear.weight.data[:, idx] + scale_zeros[idx // group_size])
+-                    / awq_linear.scales[idx // group_size]
+-                ).to(torch.int)[:, None]
+-            )
++                torch.round((linear.weight.data[:,idx] + scale_zeros[idx//group_size])
++                            / awq_linear.scales[idx//group_size]).to(torch.int)[:,None] 
++                ) # 计算权重矩阵 idx 列对应的整数权重
++            
+         intweight = torch.cat(intweight, dim=1)
+         intweight = intweight.t().contiguous()
+-        intweight = intweight.to(dtype=torch.int32)
+-
++        intweight = intweight.to(dtype=torch.int32) # 转换为 int32 类型
++        
+         best_device = get_best_device()
+ 
+         # Avoid: The operator 'aten::__lshift__.Scalar' is not currently implemented for the MPS device
+         if "mps" in best_device:
+             intweight = intweight.to("cpu")
+ 
+-        qweight = torch.zeros(
+-            (intweight.shape[0], intweight.shape[1] // 32 * awq_linear.w_bit),
+-            dtype=torch.int32,
+-            device=intweight.device,
+-        )
++        qweight = torch.zeros((intweight.shape[0], intweight.shape[1] // 32 * awq_linear.w_bit),
++                              dtype=torch.int32, device=intweight.device)
+ 
+         for col in range(intweight.shape[1] // pack_num):
+             if awq_linear.w_bit == 4:
+@@ -221,8 +204,12 @@
+             else:
+                 raise NotImplementedError("Only 4-bit are supported for now.")
+             for i in range(pack_num):
++                # int32 (32 bit) -> 4 bit 以 int32 存储，原 8 列压缩成 1 列 
++                # a << b 结果相当于 a * 2^b, 二进制移位，但更快
++                # a |= b 相当于 a = a | b 按位或
++                # https://www.cnblogs.com/ananmy/p/14449081.html
+                 qweight_col = intweight[:, col * pack_num + order_map[i]]
+-                qweight[:, col] |= qweight_col << (i * awq_linear.w_bit)
++                qweight[:, col] |= qweight_col << (i * awq_linear.w_bit) 
+         awq_linear.qweight = qweight
+ 
+         zeros = zeros.to(dtype=torch.int32, device=best_device)
+@@ -230,11 +217,8 @@
+         if "mps" in best_device:
+             zeros = zeros.to("cpu")
+ 
+-        qzeros = torch.zeros(
+-            (zeros.shape[0], zeros.shape[1] // 32 * awq_linear.w_bit),
+-            dtype=torch.int32,
+-            device=zeros.device,
+-        )
++        qzeros = torch.zeros((zeros.shape[0], zeros.shape[1] // 32 * awq_linear.w_bit),
++                             dtype=torch.int32, device=zeros.device)
+ 
+         for col in range(zeros.shape[1] // pack_num):
+             if awq_linear.w_bit == 4:
+--- a/awq/modules/linear/gemv_fast.py
++++ b/awq/modules/linear/gemv_fast.py
+@@ -144,14 +144,9 @@
+         scale_zeros = zeros * scales
+ 
+         pack_num = 32 // awq_linear.w_bit
+-        qscales = torch.zeros(
+-            (
+-                scales.shape[0],
+-                calculate_zeros_width(linear.in_features, group_size) * pack_num,
+-            ),
+-            dtype=torch.float16,
+-            device=scales.device,
+-        )
++        qscales = torch.zeros((scales.shape[0],calculate_zeros_width(linear.in_features, group_size) * pack_num),
++            dtype=torch.float16, device=scales.device)
++        
+         qscales[:, : scales.shape[1]] = scales
+         # awq_linear.scales = scales.clone().half()
+         awq_linear.scales = qscales.transpose(1, 0).contiguous()
+@@ -161,11 +156,10 @@
+         intweight = []
+         for idx in range(awq_linear.in_features):
+             intweight.append(
+-                torch.round(
+-                    (linear.weight.data[:, idx] + scale_zeros[:, idx // group_size])
+-                    / qscales[:, idx // group_size]
+-                ).to(torch.int)[:, None]
+-            )
++                torch.round((linear.weight.data[:,idx] + scale_zeros[:, idx//group_size])
++                            / qscales[:,idx//group_size]).to(torch.int)[:,None]
++                )
++            
+         intweight = torch.cat(intweight, dim=1)
+         intweight = intweight.to(dtype=torch.int32)
+         awq_linear.qweight = pack_intweight(
+--- a/awq/quantize/quantizer.py
++++ b/awq/quantize/quantizer.py
+@@ -71,6 +71,7 @@
+         )
+ 
+     def pseudo_quantize_tensor(self, w: torch.Tensor):
++        # 确保输入的权重矩阵有正确维度：2 维，列元素数可以被 self.group_size 整除且无空值
+         org_w_shape = w.shape
+         if self.group_size > 0:
+             assert org_w_shape[-1] % self.group_size == 0
+@@ -79,16 +80,15 @@
+         assert torch.isnan(w).sum() == 0
+ 
+         # zero point quantization
++        # 按照 w 的行（group）进行逐行量化，注意此时 w 的 shape 为 [num_group, group_size]
+         if self.zero_point:
+-            max_val = w.amax(dim=1, keepdim=True)
+-            min_val = w.amin(dim=1, keepdim=True)
+-            max_int = 2**self.w_bit - 1
+-            min_int = 0
+-            scales = (max_val - min_val).clamp(min=1e-5) / max_int
+-            zeros = (-torch.round(min_val / scales)).clamp_(min_int, max_int)
+-            w = (
+-                torch.clamp(torch.round(w / scales) + zeros, min_int, max_int) - zeros
+-            ) * scales
++            max_val = w.amax(dim=1, keepdim=True)  # 每行（组）最大权重
++            min_val = w.amin(dim=1, keepdim=True)  # 每行（组）最小权重
++            max_int = 2**self.w_bit - 1            # 量化到的最大整数
++            min_int = 0                            # 量化到的最小整数
++            scales = (max_val - min_val).clamp(min=1e-5) / max_int # 每一行（组）的量化缩放系数
++            zeros = (-torch.round(min_val / scales)).clamp_(min_int, max_int) # 每一行（组）的量化零点
++            w = (torch.clamp(torch.round(w / scales) + zeros, min_int, max_int) - zeros) * scales  # 量化权重后再还原
+             zeros = zeros.view(org_w_shape[0], -1)
+         else:
+             max_val = w.abs().amax(dim=1, keepdim=True)
+@@ -103,7 +103,7 @@
+         assert torch.isnan(w).sum() == 0
+ 
+         scales = scales.view(org_w_shape[0], -1)
+-        w = w.reshape(org_w_shape)
++        w = w.reshape(org_w_shape) # w 还原到原始形状
+ 
+         return w, scales, zeros
+ 
+@@ -137,15 +137,14 @@
+                 common_device = next(self.modules[i].parameters()).device
+ 
+             if self.module_kwargs.get("position_ids") is not None:
+-                self.module_kwargs["position_ids"] = self.module_kwargs[
+-                    "position_ids"
+-                ].to(common_device)
++                self.module_kwargs["position_ids"] = self.module_kwargs["position_ids"].to(common_device)
+ 
+             if self.module_kwargs.get("attention_mask") is not None:
+-                self.module_kwargs["attention_mask"] = self.module_kwargs[
+-                    "attention_mask"
+-                ].to(common_device)
+-
++                self.module_kwargs["attention_mask"] = self.module_kwargs["attention_mask"].to(common_device)
++
++            if self.module_kwargs.get("past_key_value") is not None: ## * ##
++                self.module_kwargs["past_key_value"] = None          ## * ##
++    
+             self.inps = self.inps.to(common_device)
+ 
+             # We need to move the rotary embedding every time we move to a new module.
+@@ -157,48 +156,39 @@
+                 # position embeddings found in tuple
+                 if isinstance(v, tuple):
+                     self.module_kwargs[k] = tuple(
+-                        item.to(common_device) if isinstance(item, (torch.Tensor, nn.Module)) 
+-                        else item for item in v
++                        item.to(common_device) if isinstance(item, (torch.Tensor, nn.Module)) else item 
++                        for item in v
+                     )
+ 
+-            # [STEP 1]: Get layer, extract linear modules, extract input features
++            # [STEP 1]: Extract linear layers from the current module and filter out the layers we don't want to quantize.
+             named_linears = get_named_linears(self.modules[i])
+-
+-            # Filter out the linear layers we don't want to exclude
+-            named_linears = exclude_layers_to_not_quantize(
+-                named_linears, self.modules_to_not_convert
+-            )
++            named_linears = exclude_layers_to_not_quantize(named_linears, self.modules_to_not_convert)
+ 
+             input_feat = self._get_input_feat(self.modules[i], named_linears)
+             clear_memory()
+ 
+             # [STEP 2]: Compute and apply scale list
+-            module_config: List[Dict] = self.awq_model.get_layers_for_scaling(
+-                self.modules[i], input_feat, self.module_kwargs
+-            )
+-            scales_list = [
+-                self._search_best_scale(self.modules[i], **layer)
+-                for layer in module_config
+-            ]
++            module_config: List[Dict] = self.awq_model.get_layers_for_scaling(self.modules[i], input_feat, self.module_kwargs)
++            scales_list = [self._search_best_scale(self.modules[i], **layer) for layer in module_config] #[(prev_op_name, names_of_linear_layers_to_quantize, best_scales), ...]
+             apply_scale(self.modules[i], scales_list, input_feat_dict=input_feat)
+-            scales_list = append_str_prefix(
+-                scales_list, get_op_name(self.model, self.modules[i]) + "."
+-            )
++            scales_list = append_str_prefix(scales_list, get_op_name(self.model, self.modules[i]) + ".")
+ 
+             # [STEP 3]: Compute and apply clipping list
++            
++            '''
++            Weight Clipping（权重裁剪） 是一种用于训练神经网络的正则化技术，
++            它通过限制权重参数的范围来防止模型过拟合、梯度爆炸或梯度消失等问题。
++            其基本思想是在每次参数更新后，将权重限制在一个预先设定的范围内。
++            '''
++            
+             if self.apply_clip:
+-                clip_list = self._search_best_clip(
+-                    self.modules[i], named_linears, input_feat
+-                )
++                clip_list = self._search_best_clip(self.modules[i], named_linears, input_feat)
+                 apply_clip(self.modules[i], clip_list)
+-                clip_list = append_str_prefix(
+-                    clip_list, get_op_name(self.model, self.modules[i]) + "."
+-                )
++                clip_list = append_str_prefix(clip_list, get_op_name(self.model, self.modules[i]) + ".")
+ 
+             # [STEP 4]: Quantize weights
+             if not self.export_compatible:
+                 self._apply_quant(self.modules[i], named_linears)
+-
+             clear_memory()
+ 
+     def pack(self):
+@@ -278,15 +268,7 @@
+         return module_output
+ 
+     @torch.no_grad()
+-    def _search_best_scale(
+-        self,
+-        module,
+-        prev_op,
+-        layers: List[nn.Linear],
+-        inp: torch.Tensor,
+-        module2inspect=None,
+-        kwargs={},
+-    ):
++    def _search_best_scale(self, module, prev_op, layers: List[nn.Linear], inp: torch.Tensor,module2inspect=None, kwargs={}):
+         if module2inspect is None:
+             assert len(layers) == 1
+             module2inspect = layers[0]
+@@ -317,105 +299,117 @@
+         inp_flat = inp.cpu().abs().view(-1, inp.shape[-1])
+         num_elements = inp_flat.size(0)
+         num_channels = inp_flat.size(1)
+-        element_size_bytes = inp_flat.element_size() * 2 # multiplied by 2 for FP32
+-
++        
+         # Calculate chunk size dynamically based on max_chunk_memory
+-        chunk_size = int(self.max_chunk_memory // (element_size_bytes * num_channels))
++        # 计算 input 每个元素 element (row) 在 FP32 精度（最大精度）下各占用多少 byte
++        # 为了防止计算内存溢出，以固定的若干行为一个单位（chunk）进行后续计算
++        element_size_bytes = inp_flat.element_size() * 2 * num_channels # fp16 by default, multiplied by 2 for FP32
++        chunk_size = int(self.max_chunk_memory // element_size_bytes)
+         chunk_size = min(chunk_size, num_elements)
+ 
+-        # Use float32 for sum calculation
++        # Use float32 for sum calculation ()
+         x_sum = torch.zeros(num_channels, dtype=torch.float32, device=inp.device)
+         
+         for i in range(0, num_elements, chunk_size):
++            # 以 chunck 为单位对 inp_flat 每一列（channel）进行求和
+             end = min(i + chunk_size, num_elements)
+             chunk_sum = inp_flat[i:end].to(torch.float32).sum(dim=0)
+             x_sum += chunk_sum.to(inp.device)
+ 
+-        x_mean = (x_sum / num_elements).to(inp.dtype)
++        x_mean = (x_sum / num_elements).to(inp.dtype) # 计算 inp_flat 每一列均值，并保存为 inp.dtype 类型
+         clear_memory(x_sum)
+ 
+-        # [STEP 3]: Compute output of module
++        # [STEP 3]: Compute output of module2inspect
+         with torch.no_grad():
+             module_kwargs = self._sanitize_kwargs(kwargs, module2inspect)
+             fp16_output = self._module_forward(inp, module2inspect, module_kwargs)
+ 
+-        # [STEP 4]: Compute loss
+-        best_scales = self._compute_best_scale(
+-            inp, w_mean, x_mean, module2inspect, layers, fp16_output, module_kwargs
++        # [STEP 4]: Compute the best_scale for weights in this module2inspect ####
++        best_scales = self._compute_best_scale(inp, w_mean, x_mean, module2inspect, layers, fp16_output, module_kwargs)
++        # clear_memory(fp16_output) ## * ##
++        
++        return (
++            get_op_name(module, prev_op),                    # check if prev_op is in the current father module and return its name
++            tuple([get_op_name(module, m) for m in layers]), # check if linear layers of module2inspect is in the current father module and return their names
++            best_scales, 
+         )
+ 
+-        return (
+-            get_op_name(module, prev_op),
+-            tuple([get_op_name(module, m) for m in layers]),
+-            best_scales,
+-        )
+ 
+     def _compute_best_scale(
+-        self,
+-        x: torch.Tensor,
+-        w_mean: torch.Tensor,
+-        x_mean: torch.Tensor,
+-        module2inspect: torch.nn.Module,
+-        linears2scale: List[nn.Linear],
++        self, x: torch.Tensor, 
++        w_mean: torch.Tensor, 
++        x_mean: torch.Tensor, 
++        module2inspect: torch.nn.Module, 
++        linears2scale: List[nn.Linear], 
+         fp16_output: torch.Tensor,
+-        kwargs: Dict={},
+-    ):
++        kwargs: Dict={}):
++        
+         """
+-        Compute loss and select best scales
+-
+-        L(s) = || Q(W * s) (s^-1 * X) - W * X ||
++        Select best scales
++        L[s] = || Q(W * s) (s^-1 * X) - W * X ||
+         Q: weight quantization function | pseudo_quantize_tensor(W * s)
+         X: inputs from calib dataset    | X
+         W: original weights in FP16     | layer
+         s: per channel scaling factor   | s^-1 * X
+         """
+-        n_grid = 20
+-        history = []
+-        best_ratio = -1
+-        best_scales = None
+-        best_error = float("inf")
+-
++        
++        """
++        该函数实现了论文 3.2 网格寻优寻找最佳缩放常数 s 的过程，优化目标为：
++        find r in [0,1] which minimize L[s(r; x_mean(, w_mean))]  s.t. final s := s(r*; x_mean, (w_mean))，其中：
++        - r 是论文中的 alpha 的范围被离散化为 { 0/ng , ... , (ng-1)/ng }, ng 为离散化的网格数；
++        - L[s] 为量化误差, L[s] = || Q(W * s) (s^-1 * X) - W * X ||
++        - s(r; x_mean(, w_mean)) 为缩放常数满足的函数，为论文中的 sx 如果：
++             self.duo_scaling = True, 则为 s(r; x_mean, w_mean) = standardization(max{ x_mean.^r / (w_mean.^(1-r) + 1e-4) , 1e-4) })
++             self.duo_scaling = False, 则为 s(r; x_mean) = standardization(max{ x_mean.^r , 1e-4) })
++             self.duo_scaling = True 实际上代表了对较大的 weight 不用过多的缩放，而对较小的 weight 进行较大的缩放。
++             standardization(s) = s/sqrt(smax*smin) 表示对序列 s 进行标准化，防止 s 过大或者过小
++        """
++        
++        n_grid = 20                # ng, number of grids to search for r
++        history = []               # store the loss of each r
++        best_ratio = -1            # r* 
++        best_scales = None         # current s(r*; x_mean, (w_mean))
++        best_error = float("inf")  # current min L[s]
++
++        # 保留 module2inspect 的原始参数值并转移到 cpu
+         org_sd = {k: v.cpu() for k, v in module2inspect.state_dict().items()}
+-
+-        device = x.device
++        device = x.device 
+         x_mean = x_mean.view(-1).to(device)
+         w_mean = w_mean.view(-1).to(device)
+ 
+         for ratio in range(n_grid):
+             # create new scales
+-            ratio = ratio / n_grid
+-
+-            # NOTE: s^-1 * x is fused here, according to paper
+-            if self.duo_scaling:
++            ratio = ratio / n_grid # current r
++
++            # compute current scale s(r; x_mean, (w_mean))
++            if self.duo_scaling: # True by default
+                 scales = (x_mean.pow(ratio) / (w_mean.pow(1 - ratio) + 1e-4)).clamp(min=1e-4)
+             else:
+                 scales = x_mean.pow(ratio).clamp(min=1e-4).view(-1)
+-            scales = scales / (scales.max() * scales.min()).sqrt()
++            scales = scales / (scales.max() * scales.min()).sqrt() 
+             scales_view = scales.view(1, -1).to(device)
+ 
+             # avoid scaling values that overflow
+             scales[torch.isinf(scales)] = 1
+             scales[torch.isnan(scales)] = 1
+ 
+-            # Q(W * s)
++            # Q(W * s)/s for all inear layers in the target module
+             for fc in linears2scale:
+-                fc.weight.mul_(scales_view)
+-                fc.weight.data = (
+-                    self.pseudo_quantize_tensor(fc.weight.data)[0] / scales_view
+-                )
+-
+-            # W * X
+-            int_w_output = self._module_forward(x, module2inspect, kwargs)
++                # W * s = [s1*w1, ..., sn*wn], 注意这里对应层的权重被直接修改的， 在 426 行参数被改回
++                fc.weight.mul_(scales_view) 
++                fc.weight.data = self.pseudo_quantize_tensor(fc.weight.data)[0] / scales_view  # 伪量化 Q(W * s)/s
+ 
+             # compute mean squared error (L2 norm)
++            int_w_output = self._module_forward(x, module2inspect, kwargs) # Q(W * s)/s * X #####
+             loss = self._compute_loss(fp16_output, int_w_output, device)
++            #clear_memory(int_w_output) ## * ##
+ 
+             history.append(loss)
+             if loss < best_error:
+                 best_error = loss
+                 best_ratio = ratio
+                 best_scales = scales.clone()
+-            module2inspect.load_state_dict(org_sd)
++            module2inspect.load_state_dict(org_sd) # Reset the module2inspect to its original state
+ 
+         if best_ratio == -1:
+             logging.debug(history)
+@@ -423,7 +417,7 @@
+ 
+         assert torch.isnan(best_scales).sum() == 0, best_scales
+ 
+-        return best_scales.detach().cpu()
++        return best_scales.detach().cpu() # Return as a 1D tensor(num_channels) on cpu.
+ 
+     @torch.no_grad()
+     def _compute_loss(
+@@ -431,7 +425,8 @@
+         fp16_output: torch.Tensor,
+         int_w_output: torch.Tensor,
+         device: torch.device,
+-    ):
++        ):
++        
+         loss = 0.0
+         fp16_output_flat = fp16_output.view(-1)
+         int_w_output_flat = int_w_output.view(-1)
+@@ -444,8 +439,8 @@
+         chunk_size = min(chunk_size, num_elements)
+ 
+         # Split the computation into chunks
+-        fp16_chunks = torch.split(fp16_output_flat, chunk_size)
+-        int_w_chunks = torch.split(int_w_output_flat, chunk_size)
++        fp16_chunks = torch.split(fp16_output_flat, chunk_size)   # tuple of tensors (tensor(1, chunk_size), ...)
++        int_w_chunks = torch.split(int_w_output_flat, chunk_size) # tuple of tensors (tensor(1, chunk_size), ...)
+ 
+         # Compute the loss for each chunk
+         for fp16_chunk, int_w_chunk in zip(fp16_chunks, int_w_chunks):
+@@ -459,6 +454,7 @@
+ 
+     @torch.no_grad()
+     def _search_best_clip(self, layer, named_linears, input_feat):
++        # Return [(name, max_val)] for name in named_linears and max_val returned by _compute_best_clip
+         clip_list = []
+         avoid_clipping = ["q_", "k_", "query", "key", "Wqkv"]
+ 
+@@ -468,13 +464,11 @@
+                 continue
+ 
+             named_linears[name].to(get_best_device())
+-            max_val = self._compute_best_clip(
+-                named_linears[name].weight, input_feat[name]
+-            )
++            max_val = self._compute_best_clip(named_linears[name].weight, input_feat[name])
+             clip_list.append((name, max_val))
+             named_linears[name].cpu()
+ 
+-        return clip_list
++        return clip_list # [(name, max_val)]
+ 
+     @torch.no_grad()
+     def _compute_best_clip(
+@@ -482,21 +476,26 @@
+         w: torch.Tensor,
+         input_feat: torch.Tensor,
+         n_grid=20,
+-        max_shrink=0.5,
+-        n_sample_token=512,
++        max_shrink=0.5,      # max shrink ratio for w.abs() while clipping
++        n_sample_token=512,  # number of tokens selected for computation
+     ):
++        
++        '''
++        Find the optimal max_vals for clipping the weights in the current linear layer.
++        return: best_max_val: [co, n_group, 1], best_max_val[k,i,1] gives the max_val for the weights in w[k,i:group_size]
++        '''
++        
+         assert w.dim() == 2
+         org_w_shape = w.shape
+         # w           [co, ci]      -> [co, 1, n_group, group size]
+-        # input_feat  [n_token, ci] -> [1, n_token, n_group, group size]
++        # input_feat  [batch_size, n_token, ci] -> [1, n_token, n_group, group size]
+         group_size = self.group_size if self.group_size > 0 else org_w_shape[1]
+-        input_feat = input_feat.view(-1, input_feat.shape[-1])
++        input_feat = input_feat.view(-1, input_feat.shape[-1]) # input_feat [batch_size, n_token, ci] -> [batch_size * n_token, ci]
+         input_feat = input_feat.reshape(1, input_feat.shape[0], -1, group_size)
+ 
+         # Compute input feature step size (minimum 1)
+         step_size = max(1, input_feat.shape[1] // n_sample_token)
+         input_feat = input_feat[:, ::step_size]
+-        
+         w = w.reshape(org_w_shape[0], 1, -1, group_size)
+ 
+         oc_batch_size = 256 if org_w_shape[0] % 256 == 0 else 64  # prevent OOM
+@@ -505,61 +504,75 @@
+         best_max_val_all = []
+ 
+         for i_b in range(org_w_shape[0] // oc_batch_size):
+-            w = w_all[i_b * oc_batch_size : (i_b + 1) * oc_batch_size]
+-
+-            org_max_val = w.abs().amax(dim=-1, keepdim=True)  # co, 1, n_group, 1
++            w = w_all[i_b * oc_batch_size : (i_b + 1) * oc_batch_size] # [oc_batch_size, 1, n_group, group size]
++
++            org_max_val = w.abs().amax(dim=-1, keepdim=True)  # [oc_batch_size, 1, n_group, 1]
+ 
+             best_max_val = org_max_val.clone()
+             min_errs = torch.ones_like(org_max_val) * 1e9
+-            input_feat = input_feat.to(w.device)
+-            org_out = (input_feat * w).sum(dim=-1)  # co, n_token, n_group
++            input_feat = input_feat.to(w.device)    # [1, n_token, n_group, group size]
++            
++            '''
++            input_feat * w 计算如下：
++                - input_feat 广播成 [1, n_token, n_group, group size] -> [oc_batch_size, n_token, n_group, group size]
++                - w 广播成 [oc_batch_size, 1, n_group, group size] -> [oc_batch_size, n_token, n_group, group size]
++                - input_feat * w : 逐元素相乘 : [oc_batch_size, n_token, n_group, group size]  
++                - 注意 input_feat, w 在此时对应位置已经被 scale 过 input_feat/scale, w * scale, 顾在对应位置相乘求和与 scale 之前的值相同
++            '''
++            
++            org_out = (input_feat * w).sum(dim=-1)  # [oc_batch_size, n_token, n_group]  对最后一个维度应用求和
+ 
+             for i_s in range(int(max_shrink * n_grid)):
+-                max_val = org_max_val * (1 - i_s / n_grid)
++                max_val = org_max_val * (1 - i_s / n_grid)    # 最大 org_max_val， 最小 org_max_val * (1 - max_shrinkd)
+                 min_val = -max_val
+                 cur_w = torch.clamp(w, min_val, max_val)
+-                q_w = self.pseudo_quantize_tensor(cur_w)[0]
+-                cur_out = (input_feat * q_w).sum(dim=-1)
+-
+-                # co, 1, n_group, 1
+-                err = (cur_out - org_out).pow(2).mean(dim=1).view(min_errs.shape)
++                q_w = self.pseudo_quantize_tensor(cur_w)[0]   # 函数内部自动将 w shape 转为 [-1, group_size] 输出时再转换回原始 shape
++                cur_out = (input_feat * q_w).sum(dim=-1)      # [oc_batch_size, n_token, n_group] 
++                err = (cur_out - org_out).pow(2).mean(dim=1).view(min_errs.shape) # .view: [oc_batch_size, n_group] -> [oc_batch_size, 1, n_group, 1]
+                 del cur_w
+                 del cur_out
+                 cur_best_idx = err < min_errs
+                 min_errs[cur_best_idx] = err[cur_best_idx]
+                 best_max_val[cur_best_idx] = max_val[cur_best_idx]
+-            best_max_val_all.append(best_max_val)
+-
+-        best_max_val = torch.cat(best_max_val_all, dim=0)
++            best_max_val_all.append(best_max_val) # optimal max_vals for the batch
++
++        best_max_val = torch.cat(best_max_val_all, dim=0) # optimal max_vals for the whole weight matrix: [oc_batch_size * num_batch = co, 1, n_group, 1]
+ 
+         clear_memory(input_feat)
+         clear_memory(org_out)
+ 
+-        return best_max_val.squeeze(1)
++        return best_max_val.squeeze(1) # [co, n_group, 1]
+ 
+     def init_quant(self, n_samples=128, max_seq_len=512):
++        
++        ''' 这个模块的核心目的是初始化量化过程，为后续的量化操作做好必要的准备工作，
++        包括捕获输入特征（inps）和关键字参数（layer_kwargs），以便用于校准和优化。'''
++        
+         modules = self.awq_model.get_model_layers(self.model)
+-        samples = get_calib_dataset(
+-            data=self.calib_data,
+-            tokenizer=self.tokenizer,
+-            n_samples=n_samples,
+-            max_seq_len=max_seq_len,
+-            split=self.split,
+-            text_column=self.text_column,
+-        )
+-        samples = torch.cat(samples, dim=0)
++        samples = get_calib_dataset(data=self.calib_data,
++                                    tokenizer=self.tokenizer,
++                                    n_samples=n_samples,
++                                    max_seq_len=max_seq_len,
++                                    split=self.split,
++                                    text_column=self.text_column)
++        
++        samples = torch.cat(samples, dim=0)                  # 获取 calibration data，维度转为 tensor(num_samples, max_seq_len) 
+ 
+         inps = []
+         layer_kwargs = {}
+ 
+         best_device = get_best_device()
+-        modules[0] = modules[0].to(best_device)
+-        self.awq_model.move_embed(self.model, best_device)
++        modules[0] = modules[0].to(best_device)              # 将 awq_model.model.model 第 0 层 DecoderLayer 移动到 best_device
++        self.awq_model.move_embed(self.model, best_device)   # 将 awq_model.model.model 的 embedding 层移动到 best_device
+ 
+         # get input and kwargs to layer 0
+         # with_kwargs is only supported in PyTorch 2.0
+         # use this Catcher hack for now
++        
+         class Catcher(nn.Module):
++            
++            ''' Catcher 的目的是捕捉 embedding 后的第一个模块输入 x 以及关键字参数'''
++            
+             def __init__(self, module):
+                 super().__init__()
+                 self.module = module
+@@ -571,47 +584,52 @@
+                     del args
+                 else:
+                     first_key = list(kwargs.keys())[0]
+-                    hidden_states = kwargs.pop(first_key)
++                    hidden_states = kwargs.pop(first_key) # 移除 first_key 并返回对应的 value
+ 
+                 inps.append(hidden_states)
+                 layer_kwargs.update(kwargs)
+                 raise ValueError  # early exit to break later inference
+ 
+         # patch layer 0 to catch input and kwargs
+-        modules[0] = Catcher(modules[0])
++        modules[0] = Catcher(modules[0]) # Catcher 包裹模型第一层 DecoderLayer 以捕获其输入
+         try:
+-            self.model(samples.to(next(self.model.parameters()).device))
+-        except ValueError:  # work with early exit
++            if getattr(self.model, "language_model", None) is None:                                     ## * ##
++                self.model(samples.to(next(self.model.parameters()).device))                            ## * ##
++            else:                                                                                       ## * ##
++                self.model.language_model(samples.to(next(self.model.language_model.parameters()).device))    ## * ##
++        except ValueError:                # work with early exit
+             pass
+-        modules[0] = modules[0].module  # restore
+-
+-        # Update the layer kwargs with `prepare_inputs_for_generation` method
+-        # that takes care of everything to avoid unexpected errors.
++        modules[0] = modules[0].module    # restore modules[0]
++
++        # Update the layer kwargs with `prepare_inputs_for_generation` method to avoid unexpected errors.
++        ## old_layer_kwargs = layer_kwargs
+         layer_kwargs = self.model.prepare_inputs_for_generation(samples, **layer_kwargs)
+-        # Pop the input_ids as they are not needed at all.
+-        layer_kwargs.pop("input_ids")
++        layer_kwargs.pop("input_ids")  # Pop the input_ids as they are not needed at all.
+ 
+         del samples
+         inps = inps[0]
+-
+         modules[0] = modules[0].cpu()
+         self.awq_model.move_embed(self.model, "cpu")
+-
+         clear_memory()
+ 
+         if layer_kwargs.get("attention_mask") is not None:
+-            layer_kwargs["attention_mask"] = layer_kwargs["attention_mask"].to(
+-                best_device
+-            )
++            layer_kwargs["attention_mask"] = layer_kwargs["attention_mask"].to(best_device)
+ 
+         return modules, layer_kwargs, inps
+ 
+     def _get_input_feat(self, layer, named_linears):
++        
++        '''
++        Obtain the input of the linear layers in the current module as a dict 
++        {linear_layer_name: tensor(total_calib_sample_num, max_calib_seq_len, embedding_dim)}, 
++        and update self.inps for the next module.
++        '''
++        
+         # firstly, get input features of all linear layers
+         def cache_input_hook(m, x, y, name, feat_dict):
+-            x = x[0]
++            x = x[0] # x is usually a tuple with x[0] be the real input
+             x = x.detach().cpu()
+-            feat_dict[name].append(x)
++            feat_dict[name].append(x) # {name:[x]}, x is an input tensor.
+ 
+         input_feat = defaultdict(list)
+         handles = []
+@@ -630,30 +648,36 @@
+             }
+ 
+         for name in named_linears:
++            
++            ''' 对该模块中每一个目标线性层注册钩子函数，在 forward 时每个 layer 的 input 会被从计算图中摘除，
++            转移到 cpu 并以字典的形式记录在 input_feat 中'''
++            
+             handles.append(
+                 named_linears[name].register_forward_hook(
+                     functools.partial(cache_input_hook, name=name, feat_dict=input_feat)
+                 )
+-            )
+-        self.inps = self.inps.to(next(layer.parameters()).device)  # in case multi-gpu
+-        # get output as next layer's input
+-
+-        # Sanitize the kwargs in case we use transformers version that contains
+-        # kwargs that are not handled by the module.
+-        # Useful for trust_remote_code models.
++            ) 
++            
++        ''' Run the module to get specific input features for each registered linear layer;
++        also update self.inps for the next module input as the output of the current layer. '''
++        
++        # Remove the arguments in self.module_kwargs that are not supported in the module's forward pass.
+         module_kwargs = self._sanitize_kwargs(self.module_kwargs, layer)
+-
++        # Run module.forward to record input features and update self.inps.
++        self.inps = self.inps.to(next(layer.parameters()).device) # Move input to rigjht device
+         self.inps = self._module_forward(self.inps, layer, module_kwargs)
+-        for h in handles:
++        for h in handles: # Remove the hooks
+             h.remove()
+-        # now solve for scaling and clipping
+-        input_feat = {k: torch.cat(v, dim=0) for k, v in input_feat.items()}
++            
++        # Now solve for scaling and clipping
++        # {linear_layer_name: tensor(total_sample_num, max_calib_seq_len, embedding_dim)}
++        input_feat = {k: torch.cat(v, dim=0) for k, v in input_feat.items()} 
+ 
+         return input_feat
+ 
+     def _sanitize_kwargs(self, inputs_kwargs, module):
+         """
+-        Remove the arguments that are not supported in the module's
++        Remove the arguments from inputs_kwargs that are not supported in the module's
+         forward pass to avoid breaking behaviour between different versions
+         of transformers.
+ 
+@@ -663,8 +687,8 @@
+             module (`torch.nn.Module`):
+                 Target module to quantize.
+         """
+-        module_signature = inspect.signature(module.forward).parameters
+-        sanitized_kwargs = {}
++        module_signature = inspect.signature(module.forward).parameters # 返回当前模块 .forward 的参数信息
++        sanitized_kwargs = {} # 仅存储需要保留的参数
+         for k, v in inputs_kwargs.items():
+             if k in module_signature:
+                 sanitized_kwargs[k] = v
+--- a/awq/quantize/scale.py
++++ b/awq/quantize/scale.py
+@@ -12,17 +12,12 @@
+ from transformers.activations import NewGELUActivation, PytorchGELUTanh, GELUActivation
+ 
+ allowed_norms = [nn.LayerNorm, LlamaRMSNorm, GemmaRMSNorm, Gemma2RMSNorm, CohereLayerNorm]
+-allowed_act_fns = [
+-    nn.GELU,
+-    BloomGelu,
+-    NewGELUActivation,
+-    PytorchGELUTanh,
+-    GELUActivation,
+-]
++allowed_act_fns = [nn.GELU, BloomGelu, NewGELUActivation, PytorchGELUTanh, GELUActivation]
+ 
+ 
+ @torch.no_grad()
+ def apply_clip(module, clip_list: Tuple[str, torch.Tensor]):
++    # Apply clipping to the target layer.
+     for name, max_val in clip_list:
+         layer: nn.Linear = get_op_by_name(module, name)
+         layer.to(get_best_device())
+@@ -46,23 +41,27 @@
+         scales.to(best_device)
+ 
+         if (
+-            isinstance(prev_op, nn.Linear)
++            isinstance(prev_op, nn.Linear)                        
+             and type(layers) == list
+             and isinstance(layers[0], nn.Linear)
+-        ):
++        ): 
++            # prev_op is a linear layer
+             scale_fc_fcs(prev_op, layers, scales)
+ 
+-        elif isinstance(prev_op, nn.Linear):
++        elif isinstance(prev_op, nn.Linear):    
++            # prev_op is a linear layer and layers contains a single linear layer ????                   
+             assert len(layers) == 1
+             scale_fc_fc(prev_op, layers[0], scales)
+ 
+         elif (
+-            any(isinstance(prev_op, t) for t in allowed_norms)
++            any(isinstance(prev_op, t) for t in allowed_norms)     
+             or "rmsnorm" in str(prev_op.__class__).lower()
+         ):
++            # prev_op is a norm layer speciied in allowed_norms or some type of Root Mean Square Layer Normalization
+             scale_ln_fcs(prev_op, layers, scales)
+ 
+-        elif any(isinstance(prev_op, t) for t in allowed_act_fns):
++        elif any(isinstance(prev_op, t) for t in allowed_act_fns): 
++            # prev_op is an activation function in allowed_act_fns
+             new_module = ScaledActivation(prev_op, scales)
+             set_op_by_name(module, prev_op_name, new_module)
+             scale_gelu_fc(prev_op, layers[0], scales)
+@@ -85,14 +84,20 @@
+ 
+ 
+ @torch.no_grad()
+-def scale_ln_fcs(ln: nn.Linear, fcs: List[nn.Linear], scales: torch.Tensor):
++def scale_ln_fcs(ln: allowed_norms, fcs: List[nn.Linear], scales: torch.Tensor):
++    
++    '''
++    Scales prev_op (first input, allowed_norms) and layer in layers using scales such that 
++    layer(prev_op(x)) = scale[layer](scale[prev_op](x)).
++    '''
++    
+     if not isinstance(fcs, list):
+         fcs = [fcs]
+ 
+     scales = scales.to(ln.weight.device)
+ 
+     # GemmaRMSNorm is different from Llama's in that it multiplies
+-    # (1 + weight) to the output, instead of just weight.
++    # *(1 + weight) to the output, instead of just *weight.
+     if isinstance(ln, GemmaRMSNorm) or isinstance(ln, Gemma2RMSNorm):
+         ln.weight += 1
+         ln.weight.div_(scales)
+@@ -106,6 +111,7 @@
+     for fc in fcs:
+         fc.weight.mul_(scales.view(1, -1))
+ 
++    # no nans
+     for p in ln.parameters():
+         assert torch.isnan(p).sum() == 0
+     for fc in fcs:
+@@ -126,6 +132,7 @@
+ 
+     fc2.weight.mul_(scales.view(1, -1))
+ 
++    # no nans
+     for p in fc1.parameters():
+         assert torch.isnan(p).sum() == 0
+     for p in fc2.parameters():
+@@ -134,6 +141,12 @@
+ 
+ @torch.no_grad()
+ def scale_fc_fcs(fc1: nn.Linear, fcs: List[nn.Linear], scales: torch.Tensor):
++        
++    '''
++    Scales prev_op (first input, nn.linear) and layer in layers using scales such that 
++    layer(prev_op(x)) = scale[layer](scale[prev_op](x)).
++    '''
++    
+     if not isinstance(fcs, list):
+         fcs = [fcs]
+ 
+@@ -143,9 +156,11 @@
+     if fc1.bias is not None:
+         fc1.bias.div_(scales.view(-1))
+ 
++    # apply scales to weights of linear layers
+     for fc in fcs:
+         fc.weight.mul_(scales.view(1, -1))
+-
++    
++    # no nans
+     for p in fc1.parameters():
+         assert torch.isnan(p).sum() == 0
+     for fc in fcs:
+@@ -160,5 +175,6 @@
+ 
+     fc.weight.mul_(scales.view(1, -1).to(fc.weight.device))
+ 
++    # no nans
+     for p in fc.parameters():
+         assert torch.isnan(p).sum() == 0
+--- a/awq/utils/calib_data.py
++++ b/awq/utils/calib_data.py
+@@ -14,7 +14,9 @@
+ ):
+     if isinstance(data, str):
+         if data == "pileval":
+-            dataset = load_dataset("mit-han-lab/pile-val-backup", split="validation")
++            # dataset = load_dataset("mit-han-lab/pile-val-backup", split="validation") 
++            dataset = load_dataset("json", data_files="val_data/val.jsonl.zst") ## * ##
++            dataset = dataset['train']
+         else:
+             dataset = load_dataset(data, split=split)
+ 
+@@ -46,20 +48,21 @@
+         else:
+             line = data[text_column]
+             line = line.strip()
+-            line_encoded = tokenizer.encode(line)
++            line_encoded = tokenizer.encode(line) # list of int (tokenized line)
+         if len(line_encoded) > max_seq_len:
+             continue
+-        sample = torch.tensor([line_encoded])
++        sample = torch.tensor([line_encoded])     # torch.Size([1, len(line_encoded)])
+         if sample.numel() == 0:
+             continue
+-        samples.append(sample)
++        samples.append(sample)                    # [ torch.Size([1, len(line_encoded)]) ]
+         n_run += 1
+         if n_run == n_samples:
+             break
++        
+     # now concatenate all samples and split according to max sequence length
+-    cat_samples = torch.cat(samples, dim=1)
+-    n_split = cat_samples.shape[1] // max_seq_len
++    cat_samples = torch.cat(samples, dim=1)         # 每个样本首尾相接 torch.Size([1, sum([sample.shape[1] for sample in samples])])
++    n_split = cat_samples.shape[1] // max_seq_len   # 重新划分样本，每个样本的长度为 max_seq_len
+     logging.debug(f" * Split into {n_split} blocks")
+-    return [
+-        cat_samples[:, i * max_seq_len : (i + 1) * max_seq_len] for i in range(n_split)
+-    ]
++    
++    # [torch([[一句话的 embedding]]), ...]，size: [torch.Size(1, max_seq_len)]，一共 n_split 个样本
++    return [cat_samples[:, i * max_seq_len : (i + 1) * max_seq_len] for i in range(n_split)] --- a/awq/utils/module.py
++++ b/awq/utils/module.py
+@@ -21,6 +21,7 @@
+ 
+ 
+ def set_op_by_name(layer, name, new_module):
++    # Change the <name> module of layer by the new_module.
+     levels = name.split(".")
+     if len(levels) > 1:
+         mod_ = layer

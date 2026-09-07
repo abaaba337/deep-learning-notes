@@ -1,0 +1,81 @@
+[
+  {
+    "path": "models/vit-normalization/trained_model_baseline_lr1e-1_pre/baseline_VITS32_img100_epoch200_checkpoint.pt",
+    "bytes": 187686622,
+    "sha256": "af121170fe650306f6b3a9f4bca71dde853eb433acf3c36589088591f02f39ba",
+    "original_path": "vit-pytorch-main/vit-pytorch-main/examples/trained_model_baseline_lr1e-1_pre/baseline_VITS32_img100_epoch200_checkpoint.pt"
+  },
+  {
+    "path": "models/vit-normalization/trained_model_baseline_lr3e-2_pre/baseline_VITS32_img100_epoch200_checkpoint.pt",
+    "bytes": 187681870,
+    "sha256": "9090d5a3f3fdd1e7b039606d963af0455d6cf2e33d308d54b06c99bc040d8c22",
+    "original_path": "vit-pytorch-main/vit-pytorch-main/examples/trained_model_baseline_lr3e-2_pre/baseline_VITS32_img100_epoch200_checkpoint.pt"
+  },
+  {
+    "path": "models/vit-normalization/trained_model_mixln_postpre_lr1e-1_alpha50/mixln_VITS32_epoch200_checkpoint.pt",
+    "bytes": 187671962,
+    "sha256": "68bfc32c5cc9abe9aeb478360b605cd867cce156b783677170df9822a00260cf",
+    "original_path": "vit-pytorch-main/vit-pytorch-main/examples/trained_model_mixln_postpre_lr1e-1_alpha50/mixln_VITS32_epoch200_checkpoint.pt"
+  },
+  {
+    "path": "models/vit-normalization/trained_model_mixln_postpre_lr3e-2_alpha25/mixln_VITS32_epoch200_checkpoint.pt",
+    "bytes": 187671898,
+    "sha256": "696091c787be730aa90e261bf79290c79625e48190385c3e40904ce1a458e35b",
+    "original_path": "vit-pytorch-main/vit-pytorch-main/examples/trained_model_mixln_postpre_lr3e-2_alpha25/mixln_VITS32_epoch200_checkpoint.pt"
+  },
+  {
+    "path": "models/vit-normalization/trained_model_mixln_preB2Tpost_lr1e-1_alpha50/mixln_VITS32_epoch200_checkpoint.pt",
+    "bytes": 187671962,
+    "sha256": "b6a398ab575f4cfbb1ebac5c85df1c6e6d87f77afe932040f323ead2f5a61904",
+    "original_path": "vit-pytorch-main/vit-pytorch-main/examples/trained_model_mixln_preB2Tpost_lr1e-1_alpha50/mixln_VITS32_epoch200_checkpoint.pt"
+  },
+  {
+    "path": "models/vit-normalization/trained_model_mixln_preB2Tpost_lr3e-2_alpha25/mixln_VITS32_epoch200_checkpoint.pt",
+    "bytes": 187671898,
+    "sha256": "78e0eed9e4640a1f72f8b7778add94df901ec162a1a6e798248c96f66384fddc",
+    "original_path": "vit-pytorch-main/vit-pytorch-main/examples/trained_model_mixln_preB2Tpost_lr3e-2_alpha25/mixln_VITS32_epoch200_checkpoint.pt"
+  },
+  {
+    "path": "models/vit-normalization/trained_model_mixln_prepost_lr1e-1_alpha50/mixln_VITS32_epoch100_checkpoint.pt",
+    "bytes": 187671962,
+    "sha256": "e5da88b33473f6916591bf012564608600e9bd4fad737bbf9ad726121fc8bbc5",
+    "original_path": "vit-pytorch-main/vit-pytorch-main/examples/trained_model_mixln_prepost_lr1e-1_alpha50/mixln_VITS32_epoch100_checkpoint.pt"
+  },
+  {
+    "path": "models/chapter-02/Notes323CNN.pth",
+    "bytes": 95995,
+    "sha256": "5c369fa7866186480b2d235ac72ec0e7eb822da686025a813c0acbec3fcb2e77",
+    "original_path": "02 PyTorch与计算机视觉/Notes_IMProcess/Notes323CNN.pth"
+  },
+  {
+    "path": "models/chapter-02/Notes332Denoising.pth",
+    "bytes": 95515,
+    "sha256": "a41328061391a42e1c2440f206d5bd5935c7ef95e212aca784d9e88b33917ad7",
+    "original_path": "02 PyTorch与计算机视觉/Notes_IMProcess/Notes332Denoising.pth"
+  },
+  {
+    "path": "models/chapter-02/Notes224FNN.pth",
+    "bytes": 1629879,
+    "sha256": "8d8fc2fd2622f2830cb2c754ad4a93af3e5498f2021f881fd1aa3c64681bed85",
+    "original_path": "02 PyTorch与计算机视觉/Notes_NN/Notes224FNN.pth"
+  },
+  {
+    "path": "models/chapter-02/Notes243LSTM.pth",
+    "bytes": 18575,
+    "sha256": "2bfbea340a4238cebef15dc0935a27329d289081e5eaab0b65585c27f42931a9",
+    "original_path": "02 PyTorch与计算机视觉/Notes_RNN/Notes243LSTM.pth"
+  },
+  {
+    "path": "models/chapter-02/checkpoint.pt",
+    "bytes": 3338,
+    "sha256": "305b9a0613aae701ae065b4ff5072633bd645dbde09df4ced5e4b2a194999d14",
+    "original_path": "02 PyTorch与计算机视觉/Notes_RNN/StockPrediction243/GatedUnitsInRNN-main/checkpoint.pt"
+  },
+  {
+    "path": "models/chapter-02/Notes224FNN.pkl",
+    "bytes": 1630647,
+    "sha256": "a02485174573e28df0585e07380ba58ccfdadb941b3314df655a30689cc068a3",
+    "original_path": "02 PyTorch与计算机视觉/Notes_NN/Notes224FNN.pkl",
+    "format": "Legacy pickled full Net object; prefer the separate state_dict .pth for loading"
+  }
+]

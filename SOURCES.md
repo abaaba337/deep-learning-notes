@@ -13,3 +13,9 @@
 - [PyTorch LayerNorm](https://docs.pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html)：总体方差和 epsilon 在平方根内部。
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)：独立多头投影、注意力缩放与编码器/解码器掩码。
 - [PyTorch 安装选择器](https://pytorch.org/get-started/locally/) 与 [历史版本](https://docs.pytorch.org/get-started/previous-versions/)：安装命令必须匹配实际发布版本。
+
+## 实践项目
+
+- ViT 基础实现源自 [lucidrains/vit-pytorch](https://github.com/lucidrains/vit-pytorch)，保留随附许可证和 MixLN 实验变体。
+- 多模态量化使用 [AutoAWQ 0.2.7.post3](https://pypi.org/project/autoawq/0.2.7.post3/) 历史接口，自定义改动以差异文件保存。
+- 安全评估问题来自 [MM-SafetyBench](https://github.com/isXinLiu/MM-SafetyBench)；原调研 Word / PDF / Excel 保留在实践 references。

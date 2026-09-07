@@ -1,1 +1,2 @@
 markdown-it-py
+einops>=0.7

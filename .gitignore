@@ -6,3 +6,20 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .env
+
+# Local datasets, downloads, models and generated artifacts
+/models/*
+!/models/README.md
+!/models/manifest.json
+/outputs/*
+!/outputs/README.md
+/datasets/*
+!/datasets/README.md
+**/data/MNIST/
+**/data/DRIVE/
+*.pt
+*.pth
+*.safetensors
+*.pkl
+*.zip
+*.zst

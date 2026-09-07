@@ -53,8 +53,10 @@ def check():
 
     for path in ROOT.rglob('*'):
         parts = path.relative_to(ROOT).parts
-        if len(parts) > 1 and parts[0] != 'scripts' and not re.match(r'^0[1-6] ', parts[0]):
+        if len(parts) > 1 and parts[0] not in ('scripts', 'models', 'outputs', 'datasets') and not re.match(r'^0[1-6] ', parts[0]):
             continue  # Independent checkouts alongside the notes are outside this learning path.
+        if parts[0] in ('models', 'outputs', 'datasets') and parts[1:] != ('README.md',):
+            continue
         if any(part.startswith('.') for part in parts):
             continue
         if path.suffix == '.py':
@@ -67,6 +69,7 @@ def check():
             ids = [cell['id'] for cell in nb['cells']]
             assert len(ids) == len(set(ids)), f'Duplicate cell IDs: {path}'
             assert path.name == 'notes.ipynb', path
+            assert all(not c.get('outputs') and c.get('execution_count') is None for c in nb['cells']), f'Clear notebook outputs: {path}'
             texts = []
             for i, cell in enumerate(nb['cells']):
                 source = ''.join(cell['source'])
@@ -92,6 +95,8 @@ def check():
         if not chapter.is_dir():
             continue
         for image in chapter.rglob('*'):
+            if 'data' in image.relative_to(chapter).parts:
+                continue  # User-supplied input datasets are not textbook illustrations.
             if image.suffix.lower() not in IMAGE_EXTENSIONS:
                 continue
             if image.parent != chapter / 'images':

@@ -24,3 +24,10 @@
 代码部分提供结构与前向计算演示，没有完整语料训练流水线。Generator 为展示而输出概率，CrossEntropyLoss 训练应输入 logits。论文阅读部分不因布局调整而补成已实现的实验。
 
 [上一章](../02%20PyTorch%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/notes.ipynb) | [下一章](../04%20%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%B8%93%E9%A2%98%E4%B8%8E%E9%9D%A2%E8%AF%95/README.md)
+
+## 配套实践
+
+- 3.5 后：[ViT 归一化与训练稳定性](practices/vit-normalization/README.md)，把第 02 章图像分类和本章残差/归一化连接起来。
+- 3.7 和 3.10 后：[多模态模型压缩与安全评估](practices/mllm-compression-safety/README.md)，依次完成 AWQ 校准、图文推理和评估分母检查。
+
+两个实践各有 `notes.ipynb`、独立 requirements 和命令行入口；GPU 重型实验由用户在本地准备模型/数据后执行。运行输出统一到仓库根目录 outputs。

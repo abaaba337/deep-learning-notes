@@ -1,0 +1,10 @@
+# Historical experiment environment: use a separate Python 3.10/3.11 venv.
+# Install torch==2.5.1 and torchvision==0.20.1 from the appropriate PyTorch CUDA index first.
+autoawq==0.2.7.post3
+transformers==4.46.3
+accelerate==1.1.1
+datasets==3.1.0
+numpy<2
+Pillow
+sentencepiece
+protobuf

@@ -34,8 +34,15 @@ jupyter lab
 python -m pip install -r requirements-check.txt
 python scripts/check_notes.py
 python scripts/check_examples.py
+python scripts/check_practices.py
 ```
 
 第一项检查 Markdown/Notebook 的本地链接和 Python 语法；第二项用 CPU 合成数据检查 Transformer 数学行为、因果掩码及 MNIST 网络的一步训练，不下载训练数据。
 
 整理规则与来源见 [AGENTS.md](AGENTS.md)、[整理说明](整理说明.md) 和 [来源与致谢](SOURCES.md)。
+
+## 实践路径与产物约定
+
+学完 02 图像分类和 03.5 归一化后，进入第 03 章 `practices/vit-normalization`；学完 03.7 量化和 03.10 评估后，进入 `practices/mllm-compression-safety`。这两项实践的入口和练习在第 03 章 Notebook、README 中均可找到。
+
+已训练权重见 [models](models/README.md)，输入大数据见 [datasets](datasets/README.md)，所有生成产物见 [outputs](outputs/README.md)。这些目录只提交说明和模型清单。Notebook 不提交可重跑的内嵌 output，依赖通过 requirements 安装，不提交安装包或虚拟环境。
