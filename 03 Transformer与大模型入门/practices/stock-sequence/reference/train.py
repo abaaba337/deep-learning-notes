@@ -15,7 +15,7 @@ from datasets import get_data
 from sklearn.preprocessing import MinMaxScaler
 
 from pathlib import Path
-OUTPUT_DIR = Path(__file__).resolve().parents[4] / 'outputs/chapter-02/stock-reference'
+OUTPUT_DIR = Path(__file__).resolve().parents[4] / 'outputs/chapter-03/stock-reference'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 ### Some constants ###
 CHAPTER = Path(__file__).resolve().parents[3]

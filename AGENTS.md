@@ -13,3 +13,6 @@
 - `practices/` 下每个实践可有自己的 notes.ipynb。模型权重只放根目录 models；运行输出只写根目录 outputs；下载数据/安装包不提交。
 - 提交前清空 Notebook outputs/execution_count，保留正文、代码和稳定 cell ID。代码注释中的结果不冒充实测。
 - 新实践回归执行 `python scripts/check_practices.py`，不下载大模型，不默认发出 API 请求。
+
+- 02 章只保留图像任务；RNN、LSTM、时序预测及配套数据/代码归入 03 章开头。
+- 主 Notebook 标题统一为 H1 章、H2 章.节、H3 章.节.小节、H4 知识点；不得跳级。章节顺序调整后同步重编号、锚点、README 和配套实践引用。

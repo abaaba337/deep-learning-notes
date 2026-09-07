@@ -5,7 +5,8 @@
 | 本地子目录 | 内容 |
 |---|---|
 | `vit-normalization/<原运行名>/` | 7 个 ViT/MixLN checkpoint，每个约 179 MiB，含模型和优化器状态 |
-| `chapter-02/` | 原 FNN、CNN、去噪、LSTM 和股票参考实验权重，保留原文件名以免误配 |
+| `chapter-02/` | 原 FNN、CNN 和去噪权重，保留原文件名以免误配 |
+| `chapter-03/` | 已有 LSTM 与股票参考实验权重，随课程主题归类 |
 | `mllm/<模型名>/` | 预留给用户自行下载的完整 LLaVA 模型目录；本次没有提供这些权重 |
 
 ViT 加载用 `torch.load(path, map_location="cpu", weights_only=True)["model_state"]`，构建与运行名一致的 baseline/MixLN 结构后再 load_state_dict；原权重不是通用 Hugging Face Transformers checkpoint。02 章旧文件名和当前实验编号有差异，不能把历史 CNN 权重随意当作 UNet 权重；默认课程示例先训练，再从 `outputs/chapter-02/` 加载当前结果。

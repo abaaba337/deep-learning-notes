@@ -26,6 +26,14 @@ def check():
     # No duplicate implementation: tests extract and execute the actual teaching code.
     env = dict(torch=torch, nn=nn, F=F, sqrt=sqrt, copy=copy, device='cpu')
     path = next(ROOT.glob('03*/*.ipynb'))
+    sequence_cells = {c['id']: c for c in json.loads(path.read_text(encoding='utf-8'))['cells']}
+    sequence_env = {}
+    for setup, forward, layers in [('70cdcc57', '6e53376d', 1), ('51084d5b', '2dc6bfb6', 2)]:
+        exec(''.join(sequence_cells[setup]['source']), sequence_env)
+        exec(''.join(sequence_cells[forward]['source']), sequence_env)
+        assert sequence_env['output'].shape == (7, 1, 6)
+        assert sequence_env['s_n'].shape == (layers, 1, 6)
+    assert sequence_env['c_n'].shape == (2, 1, 6)
     definitions(path, ['legacy-03-003', 'legacy-03-004', 'legacy-03-007', 'legacy-03-008', 'legacy-03-010', 'legacy-03-011', 'legacy-03-012', 'legacy-03-013', 'legacy-03-014'], env)
     x = torch.randn(2, 5, 8)
     norm = env['LayerNorm'](8)
@@ -79,7 +87,7 @@ def check():
     env['train'](net, loaders, 1, 0.001, device='cpu')
     assert not torch.equal(before, net.hidden1.weight)
     env['test'](net, device='cpu')
-    print('PASS: LayerNorm, independent attention heads, reference attention, causality, encoder/decoder backward, MNIST training')
+    print('PASS: relocated RNN/LSTM examples, LayerNorm, independent attention heads, reference attention, causality, encoder/decoder backward, MNIST training')
 
 
 if __name__ == '__main__':

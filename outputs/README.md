@@ -2,7 +2,8 @@
 
 所有新生成文件放在这里；Notebook 的内嵌输出在提交前清空。
 
-- `chapter-02/`：教材保存的图像、FNN/CNN/U-Net/去噪/LSTM 权重。
+- `chapter-02/`：教材保存的图像、FNN/CNN/U-Net/去噪权重。
+- `chapter-03/`：时序预测的 LSTM 权重及股票参考实验输出。
 - `vit-normalization/<run>/`：config.json、history.json、checkpoint.pt。
 - `mllm-compression-safety/<run 或文件>/`：量化导出、模型回答、标注和指标。
 - 两个实践的 `imported/`：原有训练曲线和模型回答，仅作为本地历史记录。

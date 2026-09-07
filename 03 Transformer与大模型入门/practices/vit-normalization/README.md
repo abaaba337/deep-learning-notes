@@ -2,7 +2,7 @@
 
 [返回第 03 章](../../README.md) · [练习 Notebook](notes.ipynb) · [模型清单](../../../models/README.md)
 
-从第 02 章的图像分类进入 ViT：图像切成 patch → patch embedding 与位置编码 → Transformer → 分类 logits。在第 03 章 3.5 学完 Pre-LN、Post-LN 后，比较 baseline、PostPre、PreB2TPost 和 PrePost。实际实现是标准多头自注意力，旧 Notebook 标题中的 Linformer 不适用。
+从第 02 章的图像分类进入 ViT：图像切成 patch → patch embedding 与位置编码 → Transformer → 分类 logits。在第 03 章 3.6 学完 Pre-LN、Post-LN 后，比较 baseline、PostPre、PreB2TPost 和 PrePost。实际实现是标准多头自注意力，旧 Notebook 标题中的 Linformer 不适用。
 
 ## 代码与学习顺序
 
@@ -13,7 +13,7 @@
 
 ## 环境与运行
 
-CPU 可运行练习及小型回归；完整 ImageNet100 训练需要 GPU。建议 Python 3.10/3.11 独立环境，先安装匹配的 torch/torchvision，再 `python -m pip install -r requirements.txt`。不把现有环境打包上传。Windows 默认 `--workers 0`，避免 Notebook 多进程入口问题。
+CPU 可运行练习及小型回归；完整 ImageNet100 训练需要 GPU。建议 Python 3.11/3.11 独立环境，先安装匹配的 torch/torchvision，再 `python -m pip install -r requirements.txt`。不把现有环境打包上传。Windows 默认 `--workers 0`，避免 Notebook 多进程入口问题。
 
 在本实践目录运行：
 

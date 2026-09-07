@@ -60,13 +60,13 @@
     "original_path": "02 PyTorch与计算机视觉/Notes_NN/Notes224FNN.pth"
   },
   {
-    "path": "models/chapter-02/Notes243LSTM.pth",
+    "path": "models/chapter-03/Notes243LSTM.pth",
     "bytes": 18575,
     "sha256": "2bfbea340a4238cebef15dc0935a27329d289081e5eaab0b65585c27f42931a9",
     "original_path": "02 PyTorch与计算机视觉/Notes_RNN/Notes243LSTM.pth"
   },
   {
-    "path": "models/chapter-02/checkpoint.pt",
+    "path": "models/chapter-03/checkpoint.pt",
     "bytes": 3338,
     "sha256": "305b9a0613aae701ae065b4ff5072633bd645dbde09df4ced5e4b2a194999d14",
     "original_path": "02 PyTorch与计算机视觉/Notes_RNN/StockPrediction243/GatedUnitsInRNN-main/checkpoint.pt"

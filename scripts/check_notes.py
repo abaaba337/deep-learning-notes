@@ -30,6 +30,31 @@ def links(text):
     return found
 
 
+def check_outline(nb, chapter):
+    """Keep main textbook headings numbered, contiguous and usable for navigation."""
+    counters = [int(chapter[:2]), 0, 0, 0]
+    titles = 0
+    previous_level = 0
+    for cell in nb['cells']:
+        if cell['cell_type'] != 'markdown':
+            continue
+        tokens = MarkdownIt().parse(''.join(cell['source']))
+        for i, token in enumerate(tokens):
+            if token.type != 'heading_open':
+                continue
+            level = int(token.tag[1])
+            assert 1 <= level <= 4 and level <= previous_level + 1, 'Skipped heading level'
+            previous_level = level
+            if level == 1:
+                titles += 1
+                continue
+            counters[level - 1] += 1
+            counters[level:] = [0] * (4 - level)
+            expected = '.'.join(map(str, counters[:level]))
+            assert tokens[i + 1].content.startswith(expected + ' '), (expected, tokens[i + 1].content)
+    assert titles == 1 and counters[1] > 0, 'Expected one chapter title and numbered sections'
+
+
 def check():
     errors = []
     count = 0
@@ -66,6 +91,8 @@ def check():
         if path.suffix == '.ipynb':
             nb = json.loads(path.read_text(encoding='utf-8'))
             assert nb['nbformat'] == 4
+            if len(parts) == 2 and parts[0].startswith(('02 ', '03 ')):
+                check_outline(nb, parts[0])
             ids = [cell['id'] for cell in nb['cells']]
             assert len(ids) == len(set(ids)), f'Duplicate cell IDs: {path}'
             assert path.name == 'notes.ipynb', path
@@ -84,6 +111,9 @@ def check():
         for text in texts:
             for url in links(text):
                 image_reference(url, path.parent)
+                if url.startswith(('#part-', '#sub-', '#chapter-')) and path.suffix == '.ipynb':
+                    content = '\n'.join(texts)
+                    assert f'id="{url[1:]}"' in content, (path, url)
                 if re.match(r'^(?:[a-zA-Z][\w+.-]*:|//|#)', url):
                     continue
                 rel = unquote(urlsplit(url).path).replace('\\', '/')
@@ -91,6 +121,11 @@ def check():
                 count += 1
                 if not target.exists():
                     errors.append(f'{path.relative_to(ROOT)} -> {url}')
+                elif target.name == 'notes.ipynb' and urlsplit(url).fragment.startswith(('part-', 'sub-', 'chapter-')):
+                    cells = json.loads(target.read_text(encoding='utf-8'))['cells']
+                    content = '\n'.join(''.join(c['source']) for c in cells if c['cell_type'] == 'markdown')
+                    if f'id="{urlsplit(url).fragment}"' not in content:
+                        errors.append(f'Missing notebook anchor: {path.relative_to(ROOT)} -> {url}')
     for chapter in ROOT.glob('0*'):
         if not chapter.is_dir():
             continue

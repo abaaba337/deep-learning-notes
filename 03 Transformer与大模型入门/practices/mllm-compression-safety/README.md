@@ -2,7 +2,7 @@
 
 [返回第 03 章](../../README.md) · [练习 Notebook](notes.ipynb) · [模型存放说明](../../../models/README.md)
 
-这一项目将 AWQ 实验、MM-SafetyBench 和安全评估调研材料串起来：浮点 LLaVA → 校准语言层并量化为 W4A16 → 固定图文输入生成回答 → 人工或独立评审器标注 → 比较覆盖率、安全指标和资源开销。先完成 3.7 压缩练习，再到 3.10 做评估。
+这一项目将 AWQ 实验、MM-SafetyBench 和安全评估调研材料串起来：浮点 LLaVA → 校准语言层并量化为 W4A16 → 固定图文输入生成回答 → 人工或独立评审器标注 → 比较覆盖率、安全指标和资源开销。先完成 3.8 压缩练习，再到 3.11 做评估。
 
 ## 目录与入口
 
@@ -20,7 +20,7 @@
 
 ## 环境
 
-这是历史 AutoAWQ 实验，单独使用 Python 3.10/3.11 + Linux/WSL2 + NVIDIA CUDA 环境；与主教材 CPU 环境分开。先按 [PyTorch 历史版本](https://pytorch.org/get-started/previous-versions/) 安装 torch 2.5.1 / torchvision 0.20.1 对应 CUDA 版本，再安装本目录 requirements.txt，并运行 `python -m pip check`。该配置据原 Notebook 的 Transformers 4.46.3 约束整理，完整 GPU 量化尚未在本次环境实测。
+这是历史 AutoAWQ 实验，单独使用 Python 3.11/3.11 + Linux/WSL2 + NVIDIA CUDA 环境；与主教材 CPU 环境分开。先按 [PyTorch 历史版本](https://pytorch.org/get-started/previous-versions/) 安装 torch 2.5.1 / torchvision 0.20.1 对应 CUDA 版本，再安装本目录 requirements.txt，并运行 `python -m pip check`。该配置据原 Notebook 的 Transformers 4.46.3 约束整理，完整 GPU 量化尚未在本次环境实测。
 
 [AutoAWQ 上游已停止维护](https://github.com/casper-hansen/AutoAWQ)。不要在此历史环境盲目升级 Transformers。FP16 的 7B 语言权重理论约 14 GB（十进制），13B 约 26 GB，实际还需视觉编码器、激活、KV cache 和校准空间；4 bit 不代表整个多模态模型或总显存缩小为四分之一。
 
