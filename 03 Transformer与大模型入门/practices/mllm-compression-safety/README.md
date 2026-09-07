@@ -11,7 +11,7 @@
 | 量化与本地图文推理 | [run.py](run.py) |
 | 离线指标，零 API 调用 | [metrics.py](metrics.py) |
 | 原始问题及 Tiny 子集 ID | [benchmark](benchmark/) |
-| 源码补充 | [AutoAWQ 解析](../../../06%20补充笔记/coding.md#awq) |
+| 源码补充 | [AutoAWQ 解析](../../../04%20补充笔记/coding.md#awq) |
 | 调研报告 | [安全基准综述 PDF](safety-benchmarks.pdf) |
 
 数据集图片位于根目录 `datasets/mm-safetybench/imgs/<scenario>/<SD|TYPO|SD_TYPO>/`，不是教材配图。原已生成回答位于 `outputs/mllm-compression-safety/imported/SD_TYPO/`，新运行另选输出文件。没有随附 LLaVA 浮点或 AWQ 权重。
@@ -54,7 +54,7 @@ python metrics.py ../../../outputs/mllm-compression-safety/fp16.json --output ..
 
 AWQ 用校准激活选择逐通道缩放，保持未量化的线性映射等价，再尽量降低量化后的重构误差；4 bit 的主要对象是语言模型线性权重，视觉塔保持浮点。本练习的校准是纯文本，不能称为图文联合校准。
 
-原代码注释把此处 clipping 解释为训练正则化，现纠正为：在校准数据上搜索量化裁剪阈值，降低低比特重构误差；它不是训练循环中的梯度裁剪，也不是新的参数训练。缩放、伪量化、打包和调用链统一见第 06 章 coding.md，避免保留重复且含错误的安装包注释。
+原代码注释把此处 clipping 解释为训练正则化，现纠正为：在校准数据上搜索量化裁剪阈值，降低低比特重构误差；它不是训练循环中的梯度裁剪，也不是新的参数训练。缩放、伪量化、打包和调用链统一见第 04 章 coding.md，避免保留重复且含错误的安装包注释。
 
 来源：[AWQ 论文](https://arxiv.org/abs/2306.00978)、[AutoAWQ](https://github.com/casper-hansen/AutoAWQ)、[LLaVA 官方接口](https://huggingface.co/docs/transformers/v4.47.0/model_doc/llava)、[MM-SafetyBench](https://github.com/isXinLiu/MM-SafetyBench)。数据和模型沿用各自来源的使用条件；本仓库不为第三方材料重新授权。
 

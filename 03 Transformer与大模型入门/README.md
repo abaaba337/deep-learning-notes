@@ -37,4 +37,4 @@ Transformer 部分提供结构、前向计算和数学验证，没有完整语�
 
 两个项目各有 notes.ipynb、requirements 和独立运行入口；输出仍分别放在根目录 `outputs/vit-normalization/` 和 `outputs/mllm-compression-safety/`。GPU 重型实验按各自 README 准备。
 
-[上一章：计算机视觉](../02%20PyTorch%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/notes.ipynb) | [下一章：大模型专题](../04%20%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%B8%93%E9%A2%98%E4%B8%8E%E9%9D%A2%E8%AF%95/README.md)
+[上一章：计算机视觉](../02%20PyTorch%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/notes.ipynb) | [下一章：大模型专题](../04%20%E8%A1%A5%E5%85%85%E7%AC%94%E8%AE%B0/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%B8%93%E9%A2%98%E4%B8%8E%E9%9D%A2%E8%AF%95/README.md)

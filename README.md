@@ -9,11 +9,9 @@
 | 01 | [01 神经网络与反向传播](01%20%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/README.md) | 先理解神经元、损失函数、梯度与链式法则，再进入代码。原 PDF 保留原样。 |
 | 02 | [02 PyTorch与计算机视觉](02%20PyTorch%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/README.md) | 按 FNN/MNIST → OpenCV → CNN → U-Net/分割 → 去噪 学习。 |
 | 03 | [03 序列建模与 Transformer](03%20Transformer%E4%B8%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8/README.md) | 从 RNN/LSTM 与时序预测到注意力、Transformer 实现，再依次学习训练目标、稳定性、微调、压缩、强化学习、对齐与评估。 |
-| 04 | [04 大模型专题与面试](04%20%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%B8%93%E9%A2%98%E4%B8%8E%E9%9D%A2%E8%AF%95/README.md) | 按需查阅 NLP 基础、模型架构、训练数据、分布式训练、微调、推理、强化学习、RAG、评估及应用。 |
-| 05 | [05 数据结构与算法](05%20%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/README.md) | 并行练习数组、二分查找、双指针、排序和滑动窗口，巩固编程基础。 |
-| 06 | [06 补充笔记](06%20补充笔记/concepts.md) · [coding.md](06%20补充笔记/coding.md) | 概念问答、PyTorch 接口和 AutoAWQ 源码解析，按问题查阅。 |
+| 04 | [04 补充笔记](04%20补充笔记/README.md) | 概念问答、代码解析、大模型专题与面试、数据结构与算法，按需查阅。 |
 
-主线按 01 → 02 → 03 → 04 阅读；05 是编程练习，06 是概念与代码补充笔记。学完基础后，04 可按具体问题查阅。
+主线按 01 → 02 → 03 阅读；第 04 章汇总补充资料，按问题查阅或并行练习。
 
 <a id="environment"></a>
 
@@ -94,5 +92,5 @@ python scripts/check_practices.py
 ### 实践来源
 
 - ViT 基础实现源自 [lucidrains/vit-pytorch](https://github.com/lucidrains/vit-pytorch)，保留随附许可证和 MixLN 实验变体。
-- 多模态量化使用 [AutoAWQ 0.2.7.post3](https://pypi.org/project/autoawq/0.2.7.post3/) 历史接口，必要兼容修复集中在实践 patch_autoawq.py，源码笔记见第 06 章 coding.md。
+- 多模态量化使用 [AutoAWQ 0.2.7.post3](https://pypi.org/project/autoawq/0.2.7.post3/) 历史接口，必要兼容修复集中在实践 patch_autoawq.py，源码笔记见第 04 章 coding.md。
 - 安全评估问题来自 [MM-SafetyBench](https://github.com/isXinLiu/MM-SafetyBench)；调研链接和基准表集中在实践 README，独立 PDF 与许可证保留在实践目录。
