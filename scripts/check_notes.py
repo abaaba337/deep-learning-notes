@@ -52,7 +52,10 @@ def check():
                 image_reference(node.value, path.parent)
 
     for path in ROOT.rglob('*'):
-        if any(part.startswith('.') for part in path.relative_to(ROOT).parts):
+        parts = path.relative_to(ROOT).parts
+        if len(parts) > 1 and parts[0] != 'scripts' and not re.match(r'^0[1-6] ', parts[0]):
+            continue  # Independent checkouts alongside the notes are outside this learning path.
+        if any(part.startswith('.') for part in parts):
             continue
         if path.suffix == '.py':
             python_syntax(path.read_text(encoding='utf-8-sig'), path, str(path))
