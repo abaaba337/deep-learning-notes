@@ -1,0 +1,23 @@
+# 02.大语言模型架构
+
+[返回专题目录](../README.md)
+
+- [1.attention](1.attention/1.attention.md)
+- [1.MoE论文](1.MoE%E8%AE%BA%E6%96%87/1.MoE%E8%AE%BA%E6%96%87.md)
+- [Transformer](1.%E4%B8%BB%E6%B5%81%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84/1.Transformer/Transformer.md)
+- [1.BERT](1.%E4%B8%BB%E6%B5%81%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84/2.BERT/1.BERT.md)
+- [ChatGLM](1.%E4%B8%BB%E6%B5%81%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84/3.ChatGLM/ChatGLM.md)
+- [LLaMA-2](1.%E4%B8%BB%E6%B5%81%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84/4.LLaMA/LLaMA-2.md)
+- [LLaMA-3](1.%E4%B8%BB%E6%B5%81%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84/4.LLaMA/LLaMA-3.md)
+- [LLaMA](1.%E4%B8%BB%E6%B5%81%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84/4.LLaMA/LLaMA.md)
+- [2.layer_normalization](2.layer_normalization/2.layer_normalization.md)
+- [2.MoE经典论文简牍](2.MoE%E7%BB%8F%E5%85%B8%E8%AE%BA%E6%96%87%E7%AE%80%E7%89%8D/2.MoE%E7%BB%8F%E5%85%B8%E8%AE%BA%E6%96%87%E7%AE%80%E7%89%8D.md)
+- [3.LLM MoE ：Switch Transformers](3.LLM%20MoE%20%EF%BC%9ASwitch%20Transformers/3.LLM%20MoE%20%EF%BC%9ASwitch%20Transformers.md)
+- [3.位置编码](3.%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81/3.%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81.md)
+- [4.tokenize分词](4.tokenize%E5%88%86%E8%AF%8D/4.tokenize%E5%88%86%E8%AF%8D.md)
+- [NLP面试题](5.NLP%E9%9D%A2%E8%AF%95%E9%A2%98/NLP%E9%9D%A2%E8%AF%95%E9%A2%98.md)
+- [5.token及模型参数](5.token%E5%8F%8A%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0/5.token%E5%8F%8A%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0.md)
+- [1.激活函数](6.%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/1.%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0.md)
+- [2.激活函数面试题](6.%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/2.%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E9%9D%A2%E8%AF%95%E9%A2%98.md)
+- [MHA_MQA_GQA](MHA_MQA_GQA/MHA_MQA_GQA.md)
+- [解码策略（Top-k & Top-p & Temperature）](%E8%A7%A3%E7%A0%81%E7%AD%96%E7%95%A5%EF%BC%88Top-k%20%26%20Top-p%20%26%20Temperatu/%E8%A7%A3%E7%A0%81%E7%AD%96%E7%95%A5%EF%BC%88Top-k%20%26%20Top-p%20%26%20Temperature%EF%BC%89.md)
