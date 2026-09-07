@@ -71,7 +71,7 @@ python scripts/check_practices.py
 
 学完 02 图像分类和 03.6 归一化后，进入第 03 章 `practices/vit-normalization`；学完 03.8 量化和 03.11 评估后，进入 `practices/mllm-compression-safety`。这两项实践的入口和练习在第 03 章 Notebook、README 中均可找到。
 
-已训练权重见 [models](models/README.md)，输入大数据见 [datasets](datasets/README.md)，所有生成产物见 [outputs](outputs/README.md)。这些目录只提交说明和模型清单。Notebook 不提交可重跑的内嵌 output，依赖通过 requirements 安装，不提交安装包或虚拟环境。
+已训练权重和所有生成产物统一见 [outputs](outputs/README.md)，输入大数据见 [datasets](datasets/README.md)。这些目录只提交说明和模型清单。Notebook 不提交可重跑的内嵌 output，依赖通过 requirements 安装，不提交安装包或虚拟环境。
 
 02 章处理图像任务，03 章从序列建模开始；两章 Notebook 的节、小节均连续编号，并提供分节学习目标和导航。
 

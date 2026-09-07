@@ -26,7 +26,7 @@ Notebook 使用一级章标题、二级 `章.节`、三级 `章.节.小节`、�
 
 - [股票输入数据](data/stock/stock.csv) 随 3.1 的时序预测示例保存。
 - [历史门控参考代码](practices/stock-sequence/reference/README.md) 与教材同章；它有数据划分和自定义门控实现局限。教材中的股票示例也包含全序列标准化，不代表严格的样本外预测验证。
-- RNN/LSTM 的新输出写入根目录 `outputs/chapter-03/`；已有时序模型归档位于 `models/chapter-03/`。
+- RNN/LSTM 的新输出写入根目录 `outputs/chapter-03/`；已有时序模型归档位于 `outputs/chapter-03/`。
 
 ## Transformer 实现与配套项目
 

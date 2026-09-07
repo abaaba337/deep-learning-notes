@@ -78,9 +78,9 @@ def check():
 
     for path in ROOT.rglob('*'):
         parts = path.relative_to(ROOT).parts
-        if len(parts) > 1 and parts[0] not in ('scripts', 'models', 'outputs', 'datasets') and not re.match(r'^0[1-6] ', parts[0]):
+        if len(parts) > 1 and parts[0] not in ('scripts', 'outputs', 'datasets') and not re.match(r'^0[1-6] ', parts[0]):
             continue  # Independent checkouts alongside the notes are outside this learning path.
-        if parts[0] in ('models', 'outputs', 'datasets') and parts[1:] != ('README.md',):
+        if parts[0] in ('outputs', 'datasets') and parts[1:] != ('README.md',):
             continue
         if any(part.startswith('.') for part in parts):
             continue

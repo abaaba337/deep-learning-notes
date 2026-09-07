@@ -1,5 +1,7 @@
 # deepspeed介绍
 
+> 本页代码示例以仓库根目录为工作目录，生成文件统一保存到 `outputs/chapter-04/`。
+
 ## 1.为什么需要Deepspeed
 
 -   分布式计算环境中，主节点负责协调其他节点和进程的工作
@@ -435,7 +437,7 @@ dataset_name = "samsum" # 数据集名称
 model_name="google/flan-t5-xxl" # 模型名称
 max_input_length = 512
 max_gen_length = 128
-output_dir = "checkpoints"
+output_dir = "outputs/chapter-04/deepspeed-seq2seq/checkpoints"
 num_train_epochs = 5
 learning_rate = 5e-5
 deepspeed_config = "./ds_config.json" # deepspeed配置文件
@@ -523,7 +525,7 @@ training_args = Seq2SeqTrainingArguments(
     learning_rate=learning_rate,
     num_train_epochs=num_train_epochs,
     # logging & evaluation strategies
-    logging_dir="logs",
+    logging_dir="outputs/chapter-04/deepspeed-seq2seq/logs",
     logging_strategy="steps",
     logging_steps=50, # 每50个step打印一次log
     evaluation_strategy="steps",
@@ -654,7 +656,7 @@ LORA_DROPOUT = 0.1
 # 训练参数
 EPOCHS=3
 LEARNING_RATE=5e-5
-OUTPUT_DIR="./checkpoints"
+OUTPUT_DIR="outputs/chapter-04/deepspeed/checkpoints"
 BATCH_SIZE=4 # 2
 GRADIENT_ACCUMULATION_STEPS=3
 # 其他参数
@@ -758,7 +760,7 @@ trainer = Trainer(
     data_collator=collate_fn
 )
 trainer.train()
-model.save_pretrained("best_model")
+model.save_pretrained("outputs/chapter-04/deepspeed/best_model")
 ```
 
 [【LLM】DeepSpeed分布式训练框架\_山顶夕景的博客-CSDN博客](https://blog.csdn.net/qq_35812205/article/details/131607096 "【LLM】DeepSpeed分布式训练框架_山顶夕景的博客-CSDN博客")

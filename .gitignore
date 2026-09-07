@@ -8,11 +8,9 @@ Thumbs.db
 .env
 
 # Local datasets, downloads, models and generated artifacts
-/models/*
-!/models/README.md
-!/models/manifest.json
 /outputs/*
 !/outputs/README.md
+!/outputs/manifest.json
 /datasets/*
 !/datasets/README.md
 **/data/MNIST/

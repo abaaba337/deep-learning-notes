@@ -1,6 +1,6 @@
 # 实践 1：ViT 归一化与训练稳定性
 
-[返回第 03 章](../../README.md) · [练习 Notebook](notes.ipynb) · [模型清单](../../../models/README.md)
+[返回第 03 章](../../README.md) · [练习 Notebook](notes.ipynb) · [模型清单](../../../outputs/README.md)
 
 从第 02 章的图像分类进入 ViT：图像切成 patch → patch embedding 与位置编码 → Transformer → 分类 logits。在第 03 章 3.6 学完 Pre-LN、Post-LN 后，比较 baseline、PostPre、PreB2TPost 和 PrePost。实际实现是标准多头自注意力，旧 Notebook 标题中的 Linformer 不适用。
 
@@ -29,7 +29,7 @@ python train.py --data ../../../datasets/imagenet100 --variant PostPre --alpha 0
 
 ## 已有实验与复现限制
 
-7 个原 checkpoint 已移动到根目录 `models/vit-normalization/`，原训练曲线位于 `outputs/vit-normalization/imported/<run>/history.json`。它们只在本地保存，不进 Git。原分析 Notebook 引用了一个未提供的 `preB2Tpost_lr3e-2_alpha50` checkpoint，不能据此补造第 8 次实验。
+7 个原 checkpoint 已移动到根目录 `outputs/vit-normalization/`，原训练曲线位于 `outputs/vit-normalization/imported/<run>/history.json`。它们只在本地保存，不进 Git。原分析 Notebook 引用了一个未提供的 `preB2Tpost_lr3e-2_alpha50` checkpoint，不能据此补造第 8 次实验。
 
 旧曲线来自未正确切换 eval 的训练代码；应视为历史记录，而非修正后结果。checkpoint 中缺少类别映射及完整运行元数据；下面的练习验证结构可加载，不把旧结果描述成完整复现。
 

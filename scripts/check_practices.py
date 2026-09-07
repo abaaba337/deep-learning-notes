@@ -1,6 +1,7 @@
 """CPU regressions for actual practice code; no downloads, models or APIs required."""
 from pathlib import Path
 import importlib.util
+import json
 import sys
 import tempfile
 import torch
@@ -22,6 +23,12 @@ def load(name,path):
 
 
 def check():
+    assert not (ROOT/'models').exists(), 'Use outputs for all model artifacts'
+    for item in json.loads((ROOT/'outputs/manifest.json').read_text(encoding='utf-8')):
+        path = (ROOT/item['path']).resolve()
+        assert path.is_relative_to((ROOT/'outputs').resolve()), item['path']
+        if path.exists():
+            assert path.stat().st_size == item['bytes'], item['path']
     torch.manual_seed(42)
     torch.set_num_threads(1)
     for variant in ('baseline','PostPre','PreB2TPost','PrePost'):

@@ -1,6 +1,6 @@
 # 实践 2：多模态模型压缩与安全评估
 
-[返回第 03 章](../../README.md) · [练习 Notebook](notes.ipynb) · [模型存放说明](../../../models/README.md)
+[返回第 03 章](../../README.md) · [练习 Notebook](notes.ipynb) · [模型存放说明](../../../outputs/README.md)
 
 这一项目将 AWQ 实验、MM-SafetyBench 和安全评估调研材料串起来：浮点 LLaVA → 校准语言层并量化为 W4A16 → 固定图文输入生成回答 → 人工或独立评审器标注 → 比较覆盖率、安全指标和资源开销。先完成 3.8 压缩练习，再到 3.11 做评估。
 
@@ -29,7 +29,7 @@
 ```bash
 python run.py --help
 python patch_autoawq.py
-python run.py quantize --model ../../../models/mllm/llava-1.5-7b --calibration ../../../outputs/mllm-compression-safety/calibration.jsonl --output ../../../outputs/mllm-compression-safety/llava-7b-awq
+python run.py quantize --model ../../../outputs/mllm/llava-1.5-7b --calibration ../../../outputs/mllm-compression-safety/calibration.jsonl --output ../../../outputs/mllm-compression-safety/llava-7b-awq
 ```
 
 `patch_autoawq.py` 只给指定版本补上旧实验中“语言层校准”和“校准时清空 KV cache”两项修复，不复制整个安装包。校准输入使用每行 `{"text":"一段校准文本"}` 的 UTF-8 JSONL。根目录保留了原 `val.jsonl.zst` 本地数据；用 datasets 读取、固定种子抽样后导出 JSONL。应提供足够的短文本组成 512 token 的块，默认最多 128 条；空数据或全为超长文本不能校准。不要使用评测问题作为校准语料。
@@ -37,7 +37,7 @@ python run.py quantize --model ../../../models/mllm/llava-1.5-7b --calibration .
 例如先用一种场景、一张图检查浮点模型，再用同一问题、图像和生成参数评估量化模型：
 
 ```bash
-python run.py infer --model ../../../models/mllm/llava-1.5-7b --questions benchmark/processed_questions/02-HateSpeech.json --images ../../../datasets/mm-safetybench/imgs/02-HateSpeech/SD_TYPO --label fp16 --limit 1 --output ../../../outputs/mllm-compression-safety/fp16.json
+python run.py infer --model ../../../outputs/mllm/llava-1.5-7b --questions benchmark/processed_questions/02-HateSpeech.json --images ../../../datasets/mm-safetybench/imgs/02-HateSpeech/SD_TYPO --label fp16 --limit 1 --output ../../../outputs/mllm-compression-safety/fp16.json
 python run.py infer --model ../../../outputs/mllm-compression-safety/llava-7b-awq --awq --questions benchmark/processed_questions/02-HateSpeech.json --images ../../../datasets/mm-safetybench/imgs/02-HateSpeech/SD_TYPO --label awq --limit 1 --output ../../../outputs/mllm-compression-safety/awq.json
 python metrics.py ../../../outputs/mllm-compression-safety/fp16.json --output ../../../outputs/mllm-compression-safety/fp16-metrics.json
 ```

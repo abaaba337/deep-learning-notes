@@ -1,5 +1,7 @@
 # 近端策略优化(ppo)
 
+> 本页代码示例以仓库根目录为工作目录，生成文件统一保存到 `outputs/chapter-04/`。
+
 > 文章来源：[详解近端策略优化](https://www.cnblogs.com/xingzheai/p/15931681.html "详解近端策略优化")
 
 ## 0.引言
@@ -320,8 +322,11 @@ class PPO:
       self._log_summary()
 
       if i_so_far % self.save_freq == 0:
-        torch.save(self.actor.state_dict(), './ppo_actor.pth')
-        torch.save(self.critic.state_dict(), './ppo_critic.pth')
+        from pathlib import Path
+        output_dir = Path('outputs/chapter-04/ppo')
+        output_dir.mkdir(parents=True, exist_ok=True)
+        torch.save(self.actor.state_dict(), output_dir / 'ppo_actor.pth')
+        torch.save(self.critic.state_dict(), output_dir / 'ppo_critic.pth')
 
   def rollout(self):
     """

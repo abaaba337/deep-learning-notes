@@ -20,7 +20,7 @@ Notebook 使用一级章标题、二级 `章.节`、三级 `章.节.小节`、�
 
 - [视频输入](data/opencv/Ocean.mp4) 位于 data/opencv；MNIST 由 Notebook 的 download=True 获取。
 - DRIVE 分割数据需从 [官方网站](https://drive.grand-challenge.org/) 获取并放入 `data/DRIVE/`，先训练和保存再执行模型加载示例。
-- CNN 论文存放在 references。新图像与模型输出写入根目录 `outputs/chapter-02/`；旧模型归档位于 `models/chapter-02/`。
+- CNN 论文存放在 references。新图像与模型输出写入根目录 `outputs/chapter-02/`；旧模型归档位于 `outputs/chapter-02/`。
 - OpenCV 窗口示例需要桌面环境。
 
 [下一章：从 RNN/LSTM 开始序列建模](../03%20Transformer%E4%B8%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8/notes.ipynb#part-03-01)
