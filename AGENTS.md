@@ -29,6 +29,6 @@
 - 保持已纠正口径：MSE/MAE 的平均维度、反传与更新的区别、CrossEntropyLoss 接收 logits、ToTensor 缩放条件、DataLoader 的 drop_last、Module hooks、多头独立投影、LayerNorm 方差与 epsilon、因果掩码，以及 batch/device/NumPy 转换约束。精确依据统一链接根 README 或对应补充笔记。
 - PEFT 不保证全量微调效果；LoRA 表示低秩更新，GaLore 投影梯度；state_dict 包含冻结参数和持久 buffer；AWQ clipping 是校准重构误差搜索。环境命令依真实发布组合维护，不沿用旧硬件配置推断兼容性。
 - 采用 ponytail full：先读真实调用链，依次考虑删除需求、仓内复用、标准库、平台能力、现有依赖与最小实现。共享问题在根因处修复；有代码改动完成 ponytail-review，不引入无调用方抽象。
-- 运行 `python scripts/check_notes.py` 检查链接、语法、配图与标题；运行 `python scripts/check_examples.py` 检查教材数学和基础训练；运行 `python scripts/check_practices.py` 检查实践入口与核心行为。
+- 运行 `python scripts/check_notes.py` 检查链接、语法、配图与标题；运行 `python scripts/check_examples.py` 检查教材数学和基础训练；运行 `python scripts/check_vision.py` 检查第 02 章图像网络、预处理及评估；运行 `python scripts/check_practices.py` 检查实践入口与核心行为。
 - 上述 CPU 合成检查不下载数据、大模型或调用付费 API。已有模型加载检查、轻量训练步骤不等于完整 GPU 训练、量化或安全评测；记录真实验证范围，注释结果不冒充实测。
 - 安全指标把未标注和无效标签计为 unjudged；先报告覆盖率，不把原生成回答直接视为已完成评测。具体标注规则只在实践 README 维护。

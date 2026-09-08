@@ -58,10 +58,11 @@ if torch.cuda.is_available():
 python -m pip install -r requirements-check.txt
 python scripts/check_notes.py
 python scripts/check_examples.py
+python scripts/check_vision.py
 python scripts/check_practices.py
 ```
 
-第一项检查 Markdown/Notebook 的本地链接和 Python 语法；第二项用 CPU 合成数据检查 Transformer 数学行为、因果掩码及 MNIST 网络的一步训练，不下载训练数据。第三项检查 ViT 训练与保存、量化补丁和离线指标。
+第一项检查 Markdown/Notebook 的本地链接和 Python 语法；第二项用 CPU 合成数据检查 Transformer 数学行为、因果掩码及 MNIST 网络的一步训练，不下载训练数据。第三项检查图像网络、掩码、去噪和视频资源释放；第四项检查 ViT 训练与保存、量化补丁和离线指标。
 
 维护规则与整理约定统一见 [AGENTS.md](AGENTS.md)；来源与致谢见本页下方。
 

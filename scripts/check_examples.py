@@ -79,14 +79,14 @@ def check():
     assignments = [node for node in ast.walk(ast.parse(demo)) if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'mask2' for t in node.targets)]
     assert len(assignments) == 3 and all(isinstance(a.value, ast.Constant) and a.value.value is None for a in assignments)
     env.update(optim=torch.optim)
-    definitions(next(ROOT.glob('02*/*.ipynb')), ['9dbbe5da', 'e07c76d2', '0c848dcb'], env)
+    definitions(next(ROOT.glob('02*/*.ipynb')), ['f0ee91f9', 'e07c76d2', '0c848dcb'], env)
     samples = torch.utils.data.TensorDataset(torch.randn(4, 1, 28, 28), torch.tensor([0, 1, 2, 3]))
     loaders = {key: torch.utils.data.DataLoader(samples, batch_size=2) for key in ('train', 'test')}
-    env['loaders'] = loaders
-    net = env['Net'](); before = net.hidden1.weight.detach().clone()
-    env['train'](net, loaders, 1, 0.001, device='cpu')
+    net = env['FNN'](); before = net.hidden1.weight.detach().clone()
+    env['train_classifier'](net, loaders, 1, 0.001, device='cpu')
     assert not torch.equal(before, net.hidden1.weight)
-    env['test'](net, device='cpu')
+    result = env['evaluate_classifier'](net, loaders['test'], device='cpu')
+    assert result['samples'] == 4 and 0 <= result['accuracy'] <= 1
     print('PASS: relocated RNN/LSTM examples, LayerNorm, independent attention heads, reference attention, causality, encoder/decoder backward, MNIST training')
 
 
