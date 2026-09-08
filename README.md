@@ -76,7 +76,6 @@ python scripts/check_practices.py
 
 ## 来源与致谢
 
-- CMIT 指 Centre for Mathematical Imaging Techniques；课程笔记保留其原始课程名称及正文中的引用。
 - 第 04 章含 [wdndev/llm_interview_note](https://github.com/wdndev/llm_interview_note) 的资料及原有个人整理，保留原作者署名、论文和文章链接。
 - 各章节中的论文、课件、图片、示例和 Word 附件分别遵循原来源的使用条件。本仓库没有为第三方材料另行授予统一许可证。
 
