@@ -74,6 +74,19 @@ python scripts/check_practices.py
 
 02 章处理图像任务，03 章从序列建模开始；两章 Notebook 的节、小节均连续编号，并提供分节学习目标和导航。
 
+<a id="downloads"></a>
+
+## 数据集与模型下载
+
+资源包：`deep-learning-notes-datasets-and-outputs.zip`
+
+- [百度网盘下载](https://pan.baidu.com/s/1YckQ2Oq-yAFmDWMzbpTgDg)
+- 提取码：`9sv3`
+
+下载后，将资源包中的 `datasets/` 和 `outputs/` 放到本仓库根目录，与 README.md 和 01–04 章文件夹同级。若解压后多了一层同名文件夹，进入该文件夹再移动这两个目录，避免形成 `datasets/datasets/` 或 `outputs/outputs/`。
+
+合并目录时保留仓库当前的 README 和 manifest，以及自己新生成的实验结果；不要直接覆盖整个 outputs。已有权重可按 [outputs/manifest.json](outputs/manifest.json) 中的路径、大小与 SHA-256 核对。资源包中的数据说明见 [datasets](datasets/README.md)，权重格式与输出用途见 [outputs](outputs/README.md)。未包含的数据或模型仍按对应实践说明准备。
+
 ## 来源与致谢
 
 - 第 04 章含 [wdndev/llm_interview_note](https://github.com/wdndev/llm_interview_note) 的资料及原有个人整理，保留原作者署名、论文和文章链接。
